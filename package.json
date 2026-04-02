@@ -1,0 +1,49 @@
+{
+  "name": "expense-manager",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint src/",
+    "test": "vitest",
+    "test:ci": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
+    "@prisma/client": "^7.6.0",
+    "@tailwindcss/postcss": "^4.2.2",
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^16.2.2",
+    "next": "^16.2.2",
+    "next-auth": "^5.0.0-beta.30",
+    "postcss": "^8.5.8",
+    "prisma": "^7.6.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-hook-form": "^7.72.0",
+    "tailwind-merge": "^3.5.0",
+    "tailwindcss": "^4.2.2",
+    "typescript": "^6.0.2",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.5",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/coverage-v8": "^4.1.2",
+    "dotenv": "^17.4.0",
+    "eslint-config-prettier": "^10.1.8",
+    "jsdom": "^29.0.1",
+    "prettier": "^3.8.1",
+    "vitest": "^4.1.2"
+  }
+}
