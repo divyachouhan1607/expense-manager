@@ -13,8 +13,28 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://kharcha-saathi.vercel.app"),
   title: "Kharcha Saathi",
   description: "Smart expense tracking for everyone",
+  openGraph: {
+    title: "Kharcha Saathi",
+    description: "Smart expense tracking for everyone",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Kharcha Saathi – Stress free expense tracking",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Kharcha Saathi",
+    description: "Smart expense tracking for everyone",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({
