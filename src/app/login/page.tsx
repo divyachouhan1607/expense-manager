@@ -85,7 +85,7 @@ export default async function LoginPage() {
             </div>
             <div>
               <div className="text-lg">{"🆓"}</div>
-              <div className="text-[10px] text-gray-400 mt-0.5">Free forever</div>
+              <div className="text-[10px] text-gray-400 mt-0.5">Free for now</div>
             </div>
           </div>
         </div>
