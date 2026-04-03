@@ -2604,30 +2604,46 @@
             return pickRemark(remarks.monthly);
         }
 
+        // Preload mascot image
+        const mascotPreload = new Image();
+        mascotPreload.src = 'mascot.png';
+
         function showMascot(remark, amountText) {
             const overlay = document.getElementById('mascotOverlay');
             overlay.innerHTML = `
                 <div class="mascot-popup" id="mascotPopup">
-                    <img src="mascot.png" alt="Kharcha Saathi" class="mascot-img">
-                    <div class="mascot-bubble">
+                    <img src="mascot.png" alt="Kharcha Saathi" class="mascot-img" id="mascotImg">
+                    <div class="mascot-bubble" id="mascotBubble" style="opacity:0;animation:none;">
                         <div class="mascot-bubble-name">Kharcha Saathi</div>
                         <div class="mascot-bubble-text">${remark}</div>
                         ${amountText ? '<div class="mascot-bubble-amount">' + amountText + '</div>' : ''}
                     </div>
                 </div>
             `;
-            // Auto dismiss after 3.5 seconds
+
+            // Show bubble only after mascot image is visible
+            var img = document.getElementById('mascotImg');
+            function triggerBubble() {
+                setTimeout(function() {
+                    var bubble = document.getElementById('mascotBubble');
+                    if (bubble) { bubble.style.animation = 'bubbleFadeIn 0.4s ease-out forwards'; }
+                }, 600);
+            }
+            if (img.complete) { triggerBubble(); }
+            else { img.onload = triggerBubble; }
+
+            // Auto dismiss after 4 seconds
             setTimeout(function() {
-                const popup = document.getElementById('mascotPopup');
+                var popup = document.getElementById('mascotPopup');
                 if (popup) {
                     popup.classList.add('leaving');
                     setTimeout(function() { overlay.innerHTML = ''; }, 400);
                 }
-            }, 3500);
+            }, 4000);
 
             // Tap to dismiss
             overlay.querySelector('.mascot-popup').addEventListener('click', function() {
-                const popup = document.getElementById('mascotPopup');
+                var popup = document.getElementById('mascotPopup');
                 if (popup) {
                     popup.classList.add('leaving');
                     setTimeout(function() { overlay.innerHTML = ''; }, 400);
