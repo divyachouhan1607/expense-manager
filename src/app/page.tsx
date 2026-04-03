@@ -172,7 +172,7 @@ export default async function Home() {
           <span className="font-bold text-[#D4603A]">Kharcha Saathi</span>
         </div>
         <p className="text-sm text-gray-400">
-          {"Smart expense tracking for everyone. Made with ❤️ in India."}
+          {"Track smarter! Spend better! Made with ❤️ in India."}
         </p>
       </footer>
     </main>
