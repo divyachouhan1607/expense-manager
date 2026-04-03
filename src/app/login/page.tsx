@@ -1,5 +1,32 @@
+import type { Metadata } from "next";
 import { auth, signIn } from "@/lib/auth";
 import { redirect } from "next/navigation";
+
+export const metadata: Metadata = {
+  title: "Login - Kharcha Saathi",
+  description: "Sign in to manage your finances with Kharcha Saathi",
+  openGraph: {
+    url: "https://kharcha-saathi.vercel.app/login",
+    title: "Login - Kharcha Saathi",
+    description: "Sign in to manage your finances with Kharcha Saathi",
+    siteName: "Kharcha Saathi",
+    images: [
+      {
+        url: "https://kharcha-saathi.vercel.app/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Kharcha Saathi - Stress Free Tracking",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Login - Kharcha Saathi",
+    description: "Sign in to manage your finances with Kharcha Saathi",
+    images: ["https://kharcha-saathi.vercel.app/og-image.jpg"],
+  },
+};
 
 export default async function LoginPage() {
   const session = await auth();
