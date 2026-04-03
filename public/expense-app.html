@@ -2305,7 +2305,22 @@
             updateScrollButtons(); renderMiniDashboard(); initVoiceInput();
             // Show currency modal on first visit
             if (!localStorage.getItem('currencyChosen')) { setTimeout(showCurrencyModal, 500); }
-            document.getElementById('category').addEventListener('change', function() { updateQuickCategorySelection(this.value); });
+            document.getElementById('category').addEventListener('change', function() {
+                if (this.value === '__add_new__') {
+                    this.value = '';
+                    // Switch to settings tab and focus new category input
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    document.querySelectorAll('.tab')[5].classList.add('active'); // Settings tab
+                    document.getElementById('settings').classList.add('active');
+                    setTimeout(function() {
+                        document.getElementById('newCategoryName').focus();
+                        document.getElementById('newCategoryName').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 100);
+                    return;
+                }
+                updateQuickCategorySelection(this.value);
+            });
             document.getElementById('currencyPreviewAmount').textContent = formatCurrency(1234.56);
         }
 
@@ -2391,7 +2406,8 @@
 
         function updateCategoryDropdowns() {
             const opts = categories.map(c => `<option value="${c.name}">${c.emoji} ${c.name}</option>`).join('');
-            document.getElementById('category').innerHTML = '<option value="">Select category</option>' + opts;
+            const addNew = '<option value="__add_new__">➕ Add new category...</option>';
+            document.getElementById('category').innerHTML = '<option value="">Select category</option>' + opts + addNew;
             document.getElementById('budgetCategory').innerHTML = '<option value="">Select category</option>' + opts;
         }
 
