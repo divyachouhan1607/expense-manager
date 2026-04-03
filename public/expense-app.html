@@ -2110,7 +2110,24 @@
 
         // ===== QUICK CATEGORIES =====
         function renderQuickCategories() {
-            document.getElementById('quickCategories').innerHTML = categories.map(cat =>
+            // Count usage across all months
+            const usage = {};
+            Object.values(expenses).forEach(function(me) {
+                me.forEach(function(e) { usage[e.category] = (usage[e.category] || 0) + 1; });
+            });
+
+            let topCats;
+            if (Object.keys(usage).length >= 3) {
+                // Show top 3 most used
+                topCats = Object.entries(usage).sort((a, b) => b[1] - a[1]).slice(0, 3)
+                    .map(function(entry) { return categories.find(function(c) { return c.name === entry[0]; }); })
+                    .filter(Boolean);
+            } else {
+                // New user — show first 3 defaults
+                topCats = categories.slice(0, 3);
+            }
+
+            document.getElementById('quickCategories').innerHTML = topCats.map(cat =>
                 `<button type="button" class="quick-cat-btn" data-category="${cat.name}" onclick="selectQuickCategory('${cat.name}')">${cat.emoji} ${cat.name}</button>`
             ).join('');
         }
