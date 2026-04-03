@@ -2426,13 +2426,8 @@
         }
 
         function renderAllTips() {
-            const dismissed = JSON.parse(localStorage.getItem('tipsDismissed') || '{}');
             Object.keys(tipContent).forEach(function(tab) {
-                if (dismissed[tab]) {
-                    showHelpBtn(tab);
-                } else {
-                    renderTip(tab);
-                }
+                showHelpBtn(tab);
             });
         }
 
