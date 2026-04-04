@@ -53,32 +53,33 @@
             display: none;
         }
 
-        .month-selector .theme-pill {
-            position: absolute;
-            right: 15px;
-        }
-
         .header h1 { font-size: 28px; margin: 0; }
+
+        .header-theme-toggle {
+            position: absolute;
+            bottom: 6px;
+            right: 10px;
+        }
 
         .theme-pill {
             display: flex;
-            background: rgba(0,0,0,0.25);
-            border-radius: 20px;
-            padding: 3px;
+            background: rgba(0,0,0,0.35);
+            border-radius: 14px;
+            padding: 2px;
             gap: 0;
             flex-shrink: 0;
             cursor: pointer;
-            border: 1.5px solid rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
         }
 
         .theme-pill-opt {
-            width: 34px;
-            height: 30px;
-            border-radius: 15px;
+            width: 26px;
+            height: 22px;
+            border-radius: 11px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 15px;
+            font-size: 11px;
             transition: all 0.3s ease;
             position: relative;
         }
@@ -104,7 +105,6 @@
             padding: 12px 20px;
             background: white;
             border-bottom: 1px solid #eee;
-            position: relative;
         }
 
         .month-selector button {
@@ -1811,15 +1811,18 @@
     </div>
 
     <div class="container">
-        <div class="header"></div>
+        <div class="header">
+            <div class="header-theme-toggle">
+                <div class="theme-pill" onclick="toggleTheme()" title="Toggle dark mode">
+                    <div class="theme-pill-opt active" id="themeSunOpt">☀️</div>
+                    <div class="theme-pill-opt" id="themeMoonOpt">🌙</div>
+                </div>
+            </div>
+        </div>
         <div class="month-selector">
             <button onclick="changeMonth(-1)">◀</button>
             <div class="month-display" id="monthDisplay"></div>
             <button onclick="changeMonth(1)">▶</button>
-            <div class="theme-pill" onclick="toggleTheme()" title="Toggle dark mode">
-                <div class="theme-pill-opt active" id="themeSunOpt">☀️</div>
-                <div class="theme-pill-opt" id="themeMoonOpt">🌙</div>
-            </div>
         </div>
 
         <div class="tab-scroll-container">
