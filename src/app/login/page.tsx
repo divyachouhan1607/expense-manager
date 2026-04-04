@@ -17,18 +17,16 @@ export default async function LoginPage() {
       <div className="relative w-full max-w-sm">
         {/* Logo & branding */}
         <div className="mb-8 text-center">
-          <Image
-            src="/mascot.png"
-            alt="Kharcha Saathi mascot"
-            width={120}
-            height={120}
-            className="mx-auto mb-2 drop-shadow-lg"
-            priority
-          />
-          <h1 className="flex items-center justify-center gap-1.5 text-3xl font-extrabold tracking-tight text-gray-900">
-            Kharcha
-            <Image src="/mascot.png" alt="" width={36} height={36} className="inline-block" />
-            Saathi
+          <h1 className="flex items-center justify-center gap-0 text-3xl font-extrabold tracking-tight text-[#D4603A]">
+            <span>Kharcha Saathi</span>
+            <Image
+              src="/mascot.png"
+              alt="Kharcha Saathi mascot"
+              width={48}
+              height={48}
+              className="-ml-1 -mr-[47px] drop-shadow-lg -scale-x-100"
+              priority
+            />
           </h1>
           <p className="mt-1.5 text-sm text-gray-500">
             Track smarter! Spend better!
