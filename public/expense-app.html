@@ -420,10 +420,10 @@
             background: #dc3545;
             color: white;
             border: none;
-            padding: 8px 12px;
+            padding: 6px 12px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
         }
 
         .budget-item {
@@ -541,40 +541,101 @@
             text-align: center;
         }
 
+        .category-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
         .category-item {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
-            padding: 15px;
+            padding: 12px 8px;
             background: #FDF6F2;
             border-radius: 10px;
-            margin-bottom: 10px;
+            text-align: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .category-item-info { display: flex; align-items: center; gap: 10px; }
-        .category-emoji { font-size: 24px; }
-        .category-item-name { font-weight: 600; color: #495057; }
+        .category-item:active { transform: scale(0.97); }
+
+        .category-item .category-emoji { font-size: 28px; margin-bottom: 4px; }
+        .category-item .category-item-name { font-weight: 600; color: #495057; font-size: 13px; }
 
         .category-item-badge {
-            font-size: 11px;
+            font-size: 9px;
             background: #D4603A;
             color: white;
-            padding: 3px 8px;
+            padding: 2px 6px;
             border-radius: 4px;
-            margin-left: 8px;
+            margin-top: 4px;
         }
 
-        .category-actions { display: flex; gap: 8px; }
+        .category-actions {
+            display: none;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .category-item.expanded .category-actions {
+            display: flex;
+        }
 
         .edit-btn {
             background: #D4603A;
             color: white;
             border: none;
-            padding: 8px 12px;
+            padding: 6px 12px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
         }
+
+        .categories-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            background: #FDF6F2;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 30px;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+        }
+
+        .categories-toggle:active { transform: scale(0.98); }
+
+        .categories-toggle-left {
+            font-size: 16px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .categories-toggle-count {
+            font-size: 12px;
+            color: #6c757d;
+            font-weight: 400;
+            margin-left: 6px;
+        }
+
+        .categories-toggle-arrow {
+            font-size: 14px;
+            color: #D4603A;
+            transition: transform 0.3s;
+        }
+
+        .categories-toggle-arrow.open { transform: rotate(180deg); }
+
+        .categories-section {
+            display: none;
+            padding-top: 4px;
+        }
+
+        .categories-section.visible { display: block; }
 
         .tab-scroll-container { position: relative; background: #FDF6F2; }
 
@@ -1641,6 +1702,9 @@
 
         body.dark .category-item { background: #161620; }
         body.dark .category-item-name { color: #F5E8D8; }
+        body.dark .categories-toggle { background: #161620; }
+        body.dark .categories-toggle-left { color: #F5E8D8; }
+        body.dark .categories-toggle-count { color: #887755; }
 
         body.dark .category-name { color: #F5E8D8; }
         body.dark .category-bar-bg { background: #161620; }
@@ -2127,8 +2191,13 @@
                 <button type="submit" class="btn btn-primary">Add Category</button>
             </form>
 
-            <h3 style="margin-top: 30px; margin-bottom: 15px; color: #495057; font-size: 16px;">Your Categories</h3>
-            <div id="categoryList"></div>
+            <div class="categories-toggle" onclick="toggleCategoriesSection()">
+                <span class="categories-toggle-left">Your Categories <span class="categories-toggle-count" id="categoryCount"></span></span>
+                <span class="categories-toggle-arrow" id="categoriesArrow">▼</span>
+            </div>
+            <div class="categories-section" id="categoriesSection">
+                <div class="category-grid" id="categoryList"></div>
+            </div>
         </div>
 
         <!-- Data Tab -->
@@ -3235,10 +3304,30 @@
         }
 
         function renderCategories() {
+            document.getElementById('categoryCount').textContent = `(${categories.length})`;
             document.getElementById('categoryList').innerHTML = categories.map((c, i) => `
-                <div class="category-item"><div class="category-item-info"><span class="category-emoji">${c.emoji}</span><span class="category-item-name">${c.name}${c.isDefault ? '<span class="category-item-badge">Default</span>' : ''}</span></div>
-                <div class="category-actions"><button class="edit-btn" onclick="editCategory(${i})">Edit</button>${!c.isDefault ? `<button class="delete-btn" onclick="deleteCategory(${i})">Delete</button>` : ''}</div></div>
+                <div class="category-item" onclick="toggleCategoryItem(this)">
+                    <span class="category-emoji">${c.emoji}</span>
+                    <span class="category-item-name">${c.name}</span>
+                    ${c.isDefault ? '<span class="category-item-badge">Default</span>' : ''}
+                    <div class="category-actions">
+                        <button class="edit-btn" onclick="event.stopPropagation();editCategory(${i})">Edit</button>
+                        ${!c.isDefault ? `<button class="delete-btn" onclick="event.stopPropagation();deleteCategory(${i})">Delete</button>` : ''}
+                    </div>
+                </div>
             `).join('');
+        }
+
+        function toggleCategoriesSection() {
+            document.getElementById('categoriesSection').classList.toggle('visible');
+            document.getElementById('categoriesArrow').classList.toggle('open');
+        }
+
+        function toggleCategoryItem(el) {
+            document.querySelectorAll('.category-item.expanded').forEach(item => {
+                if (item !== el) item.classList.remove('expanded');
+            });
+            el.classList.toggle('expanded');
         }
 
         function addExpense(event) {
