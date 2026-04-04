@@ -266,7 +266,7 @@
             position: absolute;
             top: 0;
             right: 0;
-            bottom: 0;
+            height: 100%;
             width: 80px;
             background: #dc3545;
             display: flex;
@@ -276,6 +276,10 @@
             font-size: 22px;
             color: white;
             cursor: pointer;
+        }
+
+        .expense-item-wrapper.expanded .expense-delete-bg {
+            display: none;
         }
 
         .expense-item {
