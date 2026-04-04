@@ -22,9 +22,9 @@ export default async function LoginPage() {
             <Image
               src="/mascot.png"
               alt="Kharcha Saathi mascot"
-              width={48}
-              height={48}
-              className="-ml-1 -mr-[47px] drop-shadow-lg -scale-x-100"
+              width={80}
+              height={80}
+              className="-ml-1 -mr-[79px] drop-shadow-lg -scale-x-100"
               priority
             />
           </h1>
@@ -36,7 +36,7 @@ export default async function LoginPage() {
         {/* Login card */}
         <div className="rounded-2xl bg-white/80 backdrop-blur-sm p-8 shadow-xl border border-white/50">
           <div className="mb-6 text-center">
-            <h2 className="text-lg font-bold text-gray-800">Welcome back</h2>
+            <h2 className="text-lg font-bold text-[#D4603A]">Welcome back</h2>
             <p className="mt-1 text-sm text-gray-400">
               Sign in to continue tracking your expenses
             </p>
