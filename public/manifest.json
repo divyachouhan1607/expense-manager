@@ -1,7 +1,7 @@
 {
   "name": "Kharcha Saathi",
   "short_name": "Kharcha Saathi",
-  "description": "Smart expense tracking for everyone",
+  "description": "Your companion for smarter spending!",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#0A1628",
