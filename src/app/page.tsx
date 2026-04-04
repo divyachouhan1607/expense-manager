@@ -186,13 +186,15 @@ export default async function Home() {
 
       {/* Footer */}
       <footer className="px-6 py-8 max-w-6xl mx-auto text-center border-t border-[#D4603A]/10">
-        <div className="flex items-center justify-center gap-1 mb-2">
-          <span className="font-bold text-[#D4603A]">Kharcha</span>
-          <Image src="/mascot.png" alt="" width={24} height={24} className="inline-block" />
-          <span className="font-bold text-[#D4603A]">Saathi</span>
+        <div className="flex items-center justify-center gap-0 mb-2">
+          <span className="font-bold text-[#D4603A]">Kharcha Saathi</span>
+          <Image src="/mascot.png" alt="" width={28} height={28} className="-ml-0.5 -scale-x-100" />
         </div>
         <p className="text-sm text-gray-400">
-          {"Track smarter! Spend better! Made with ❤️ in India."}
+          {"Track smarter! Spend better!"}
+        </p>
+        <p className="text-sm text-gray-400">
+          {"Made with ❤️ in India."}
         </p>
       </footer>
     </main>
