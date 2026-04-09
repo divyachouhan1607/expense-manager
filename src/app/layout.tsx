@@ -30,6 +30,8 @@ export const metadata: Metadata = {
     title: "Kharcha Saathi",
   },
   openGraph: {
+    url: "https://kharcha-saathi.vercel.app",
+    siteName: "Kharcha Saathi",
     title: "Kharcha Saathi",
     description: "Your companion for smarter spending!",
     images: [
