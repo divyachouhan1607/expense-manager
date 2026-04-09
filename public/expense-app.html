@@ -2579,7 +2579,7 @@
                     </label>
                     <input type="hidden" id="newCategoryEmoji" value="">
                     <div id="emojiPickerCollapsible" style="max-height:0;overflow:hidden;transition:max-height 0.3s ease;">
-                        <div id="emojiPickerGrid" style="display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:8px;"></div>
+                        <div id="emojiPickerGrid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:8px;padding:2px;"></div>
                         <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
                             <button type="button" onclick="clearEmojiSelection()" style="font-size:11px;color:#D4603A;background:none;border:none;cursor:pointer;text-decoration:underline;">Reset</button>
                         </div>
@@ -3800,7 +3800,7 @@
             const el = document.getElementById('emojiPickerCollapsible');
             const arrow = document.getElementById('emojiPickerArrow');
             const isOpen = el.style.maxHeight && el.style.maxHeight !== '0px';
-            el.style.maxHeight = isOpen ? '0px' : '300px';
+            el.style.maxHeight = isOpen ? '0px' : '400px';
             arrow.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
         }
 
