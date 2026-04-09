@@ -1970,6 +1970,115 @@
 
         body.dark .modal-confirm-btn:disabled { background: #2A1A10 !important; color: #665544 !important; }
 
+        /* ===== Multi-Select Mode ===== */
+        .select-toggle-btn {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1.5px solid #dee2e6;
+            background: white;
+            font-size: 13px;
+            font-weight: 600;
+            color: #6c757d;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .select-toggle-btn.active {
+            background: #D4603A;
+            border-color: #D4603A;
+            color: white;
+        }
+        body.dark .select-toggle-btn { background: #161620; border-color: #2A1A10; color: #887755; }
+        body.dark .select-toggle-btn.active { background: #D4603A; border-color: #D4603A; color: white; }
+
+        .expense-checkbox {
+            width: 20px;
+            height: 20px;
+            min-width: 20px;
+            border-radius: 6px;
+            border: 2px solid #dee2e6;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+        .expense-checkbox.checked {
+            background: #D4603A;
+            border-color: #D4603A;
+        }
+        .expense-checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        body.dark .expense-checkbox { background: #161620; border-color: #2A1A10; }
+        body.dark .expense-checkbox.checked { background: #D4603A; border-color: #D4603A; }
+
+        .multi-select-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #dee2e6;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            animation: slideUp 0.25s ease;
+        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        body.dark .multi-select-bar { background: #161620; border-top-color: #2A1A10; }
+
+        .multi-select-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .multi-select-count {
+            font-weight: 700;
+            font-size: 14px;
+            color: #1a1a1a;
+        }
+        body.dark .multi-select-count { color: #F5E8D8; }
+        .multi-select-link {
+            font-size: 13px;
+            color: #D4603A;
+            cursor: pointer;
+            font-weight: 600;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+        .multi-select-delete {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            background: #dc3545;
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .multi-select-delete:hover { background: #c82333; }
+        .multi-select-delete:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .expense-item.selected-highlight {
+            background: #FFF5F2;
+            border-left-color: #dc3545;
+        }
+        body.dark .expense-item.selected-highlight {
+            background: #1e1215;
+            border-left-color: #dc3545;
+        }
+
         /* ===== Toast Notifications ===== */
         .toast-container {
             position: fixed;
@@ -2217,6 +2326,7 @@
             <div class="search-filter-section">
                 <div class="search-bar">
                     <input type="text" id="searchInput" placeholder="🔍 Search expenses..." oninput="applyFilters()">
+                    <button class="select-toggle-btn" id="selectToggleBtn" onclick="toggleSelectMode()">Select</button>
                     <button class="filter-toggle-btn" id="filterToggleBtn" onclick="toggleFilterPanel()">⚙️</button>
                 </div>
 
@@ -2255,6 +2365,14 @@
                 <span class="toggle-arrow">▼</span>
             </button>
             <div class="expense-list collapsed" id="expenseList"></div>
+
+            <div class="multi-select-bar" id="multiSelectBar" style="display:none;">
+                <div class="multi-select-info">
+                    <span class="multi-select-count" id="multiSelectCount">0 selected</span>
+                    <button class="multi-select-link" onclick="toggleSelectAll();" id="selectAllBtn">Select All</button>
+                </div>
+                <button class="multi-select-delete" id="multiDeleteBtn" onclick="deleteSelected()" disabled>🗑️ Delete</button>
+            </div>
         </div>
 
         <!-- Budgets Tab -->
@@ -3770,6 +3888,80 @@
             });
         }
 
+        // ===== MULTI-SELECT MODE =====
+        let selectMode = false;
+        const selectedExpenses = new Set();
+
+        function toggleSelectMode() {
+            selectMode = !selectMode;
+            selectedExpenses.clear();
+            document.getElementById('selectToggleBtn').classList.toggle('active', selectMode);
+            document.getElementById('selectToggleBtn').textContent = selectMode ? 'Cancel' : 'Select';
+            document.getElementById('multiSelectBar').style.display = selectMode ? 'flex' : 'none';
+            updateSelectCount();
+            renderExpenses();
+        }
+
+        function toggleExpenseSelect(mk, id, el) {
+            const key = mk + ':' + id;
+            if (selectedExpenses.has(key)) { selectedExpenses.delete(key); } else { selectedExpenses.add(key); }
+            el.classList.toggle('checked', selectedExpenses.has(key));
+            el.closest('.expense-item').classList.toggle('selected-highlight', selectedExpenses.has(key));
+            updateSelectCount();
+        }
+
+        function updateSelectCount() {
+            const n = selectedExpenses.size;
+            document.getElementById('multiSelectCount').textContent = n + ' selected';
+            document.getElementById('multiDeleteBtn').disabled = n === 0;
+            const total = document.querySelectorAll('.expense-checkbox').length;
+            document.getElementById('selectAllBtn').textContent = (n > 0 && n === total) ? 'Deselect All' : 'Select All';
+        }
+
+        function toggleSelectAll() {
+            const boxes = document.querySelectorAll('.expense-checkbox');
+            const allSelected = selectedExpenses.size === boxes.length && boxes.length > 0;
+            if (allSelected) {
+                selectedExpenses.clear();
+                boxes.forEach(b => { b.classList.remove('checked'); b.closest('.expense-item').classList.remove('selected-highlight'); });
+            } else {
+                boxes.forEach(b => {
+                    const key = b.dataset.key;
+                    selectedExpenses.add(key);
+                    b.classList.add('checked');
+                    b.closest('.expense-item').classList.add('selected-highlight');
+                });
+            }
+            updateSelectCount();
+        }
+
+        function deleteSelected() {
+            if (selectedExpenses.size === 0) return;
+            const count = selectedExpenses.size;
+            const backup = [];
+            selectedExpenses.forEach(key => {
+                const [mk, idStr] = key.split(':');
+                const id = parseInt(idStr);
+                const idx = (expenses[mk] || []).findIndex(e => e.id === id);
+                if (idx !== -1) {
+                    backup.push({ mk, expense: { ...expenses[mk][idx] } });
+                    expenses[mk].splice(idx, 1);
+                    if (expenses[mk].length === 0) delete expenses[mk];
+                }
+            });
+            selectedExpenses.clear();
+            updateSelectCount();
+            saveData(); renderExpenses(); renderBudgets(); renderMonthlyAnalytics(); renderMiniDashboard();
+            showToast(`${count} expense${count > 1 ? 's' : ''} deleted`, 'info', 5000, function() {
+                backup.forEach(b => {
+                    if (!expenses[b.mk]) expenses[b.mk] = [];
+                    expenses[b.mk].push(b.expense);
+                });
+                saveData(); renderExpenses(); renderBudgets(); renderMonthlyAnalytics(); renderMiniDashboard();
+                showToast(`${count} expense${count > 1 ? 's' : ''} restored`, 'success');
+            });
+        }
+
         function editExpense(mk, id) {
             const exp = (expenses[mk] || []).find(e => e.id === id);
             if (!exp) return;
@@ -3879,25 +4071,28 @@
                 html += `</div>`;
 
                 items.forEach(e => {
+                    const eKey = mk + ':' + e.id;
+                    const isChecked = selectedExpenses.has(eKey);
                     html += `<div class="expense-item-wrapper">
-                        <div class="expense-delete-bg" onclick="deleteExpense('${mk}',${e.id})">🗑️</div>
-                        <div class="expense-item" data-expense-id="${e.id}">
+                        ${selectMode ? '' : `<div class="expense-delete-bg" onclick="deleteExpense('${mk}',${e.id})">🗑️</div>`}
+                        <div class="expense-item${isChecked ? ' selected-highlight' : ''}" data-expense-id="${e.id}" ${selectMode ? `onclick="toggleExpenseSelect('${mk}',${e.id},this.querySelector('.expense-checkbox'))"` : ''}>
+                            ${selectMode ? `<div class="expense-checkbox${isChecked ? ' checked' : ''}" data-key="${eKey}"></div>` : ''}
                             <div class="expense-info">
                                 <div class="expense-category">${e.category}</div>
                                 <div class="expense-description">${e.description}</div>
                             </div>
                             <div class="expense-amount">${formatCurrency(e.amount)}</div>
-                            <div class="expense-hover-actions">
+                            ${selectMode ? '' : `<div class="expense-hover-actions">
                                 <button class="expense-hover-btn edit-btn" onclick="editExpense('${mk}',${e.id})" title="Edit">✏️</button>
                                 <button class="expense-hover-btn del-btn" onclick="deleteExpense('${mk}',${e.id})" title="Delete">🗑️</button>
-                            </div>
+                            </div>`}
                         </div>
-                        <div class="expense-tap-actions">
+                        ${selectMode ? '' : `<div class="expense-tap-actions">
                             <div class="expense-tap-actions-inner">
                                 <button class="expense-tap-btn edit" onclick="editExpense('${mk}',${e.id})">✏️ Edit</button>
                                 <button class="expense-tap-btn delete" onclick="deleteExpense('${mk}',${e.id})">🗑️ Delete</button>
                             </div>
-                        </div>
+                        </div>`}
                     </div>`;
                 });
 
@@ -3905,7 +4100,7 @@
             });
 
             list.innerHTML = html;
-            initSwipeToDelete();
+            if (!selectMode) initSwipeToDelete();
         }
 
         // Swipe-to-delete touch handling
