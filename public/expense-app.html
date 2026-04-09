@@ -2528,9 +2528,7 @@
                 <div id="pieLegend" style="padding:0 10px;"></div>
             </div>
 
-            <h3 class="section-heading" style="margin: 30px 20px 15px 20px; color: #495057; font-size: 16px; text-align: center;">Detailed Breakdown</h3>
-
-            <div class="category-chart" id="categoryChart"></div>
+            <div class="category-chart" id="categoryChart" style="display:none;"></div>
         </div>
 
         <!-- Yearly Insight Tab -->
@@ -4558,7 +4556,15 @@
             chart.setOption(option);
             window.addEventListener('resize', function() { chart.resize(); });
 
-            // Custom rich legend
+            // Toggle legend detail
+            window.toggleLegendDetail = function(id, row) {
+                var d = document.getElementById(id);
+                var arrow = row.querySelector('.legend-arrow');
+                if (d.style.display === 'none') { d.style.display = 'block'; if(arrow) arrow.style.transform = 'rotate(180deg)'; }
+                else { d.style.display = 'none'; if(arrow) arrow.style.transform = 'rotate(0deg)'; }
+            };
+
+            // Custom rich legend with expandable breakdown
             const legendEl = document.getElementById('pieLegend');
             if (legendEl) {
                 const lgTxt = isDark ? '#c0b8a8' : '#555';
@@ -4566,11 +4572,17 @@
                 const lgPct = isDark ? '#887755' : '#999';
                 const barBg = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
                 const cardBg = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)';
+                const detailBg = isDark ? '#161620' : '#FDF6F2';
+                const detailBorder = isDark ? '#2A1A10' : '#f0f0f0';
                 const maxVal = Math.max.apply(null, data.map(function(d){return d.value}));
                 const medals = ['🥇','🥈','🥉'];
 
+                // Get monthly expenses for breakdown
+                const mk = getMonthKey(), me = expenses[mk] || [];
+
                 let lh = '<div style="display:flex;flex-direction:column;gap:5px;margin-top:6px;">';
                 data.forEach(function(d, i) {
+                    const catName = sc[i];
                     const pct = ((d.value / total) * 100).toFixed(1);
                     const barPct = Math.round((d.value / maxVal) * 100);
                     const color = baseColors[i % baseColors.length];
@@ -4581,9 +4593,17 @@
                     const topShadow = isTop ? 'box-shadow:0 2px 12px ' + color + '20;' : '';
                     const bgTint = 'background:linear-gradient(90deg,' + color + (isDark ? '12' : '08') + ',' + cardBg + ');';
 
-                    lh += '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;cursor:pointer;transition:all .25s;' + topBorder + topShadow + bgTint + '" ' +
-                        'onmouseenter="this.style.transform=\'translateX(4px)\';this.style.boxShadow=\'0 4px 16px ' + color + '25\'" ' +
-                        'onmouseleave="this.style.transform=\'none\';this.style.boxShadow=\'' + (isTop ? '0 2px 12px ' + color + '20' : 'none') + '\'">' +
+                    // Get individual expenses for this category
+                    const catExpenses = me.filter(function(e){return e.category === catName});
+                    const detailId = 'legend-detail-' + i;
+
+                    lh += '<div style="border-radius:12px;overflow:hidden;' + topBorder + topShadow + '">';
+
+                    // Main row (clickable)
+                    lh += '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;transition:all .25s;' + bgTint + '" ' +
+                        'onclick="toggleLegendDetail(\'' + detailId + '\',this)" ' +
+                        'onmouseenter="this.style.transform=\'translateX(3px)\'" ' +
+                        'onmouseleave="this.style.transform=\'none\'">' +
 
                         // Rank badge
                         '<div style="width:28px;height:28px;border-radius:50%;background:' + color + (isDark ? '22' : '15') + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:' + (medal ? '14px' : '11px') + ';font-weight:700;color:' + (medal ? color : lgPct) + ';">' + (medal || (i+1)) + '</div>' +
@@ -4591,20 +4611,35 @@
                         // Name + bar
                         '<div style="flex:1;min-width:0;">' +
                             '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">' +
-                                '<span style="font-size:12px;font-weight:600;color:' + lgTxt + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%;">' + d.name + '</span>' +
-                                '<span style="font-size:13px;font-weight:800;color:' + lgAmt + ';font-family:-apple-system,sans-serif;letter-spacing:-0.3px;">' + amt + '</span>' +
+                                '<span style="font-size:12px;font-weight:600;color:' + lgTxt + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:55%;">' + d.name + ' <span style="font-size:10px;opacity:0.6;">(' + catExpenses.length + ')</span></span>' +
+                                '<span style="font-size:13px;font-weight:800;color:' + lgAmt + ';letter-spacing:-0.3px;">' + amt + '</span>' +
                             '</div>' +
-                            // Progress bar
                             '<div style="height:5px;background:' + barBg + ';border-radius:3px;overflow:hidden;">' +
                                 '<div style="height:100%;width:' + barPct + '%;background:linear-gradient(90deg,' + color + ',' + shadeColor(color, 20) + ');border-radius:3px;transition:width 0.8s ease;"></div>' +
                             '</div>' +
                         '</div>' +
 
-                        // Percentage
-                        '<div style="min-width:38px;text-align:right;flex-shrink:0;">' +
+                        // Percentage + arrow
+                        '<div style="min-width:48px;text-align:right;flex-shrink:0;display:flex;align-items:center;gap:4px;">' +
                             '<span style="font-size:12px;font-weight:700;color:' + color + ';">' + pct + '%</span>' +
+                            '<span class="legend-arrow" style="font-size:10px;color:' + lgPct + ';transition:transform 0.3s;">▼</span>' +
                         '</div>' +
                     '</div>';
+
+                    // Expandable detail section
+                    lh += '<div id="' + detailId + '" style="display:none;background:' + detailBg + ';padding:10px 14px;border-top:1px solid ' + detailBorder + ';">';
+                    catExpenses.forEach(function(e) {
+                        lh += '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid ' + detailBorder + ';">' +
+                            '<div style="min-width:0;flex:1;">' +
+                                '<div style="font-weight:500;font-size:12px;color:' + lgAmt + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (e.description || catName) + '</div>' +
+                                '<div style="font-size:10px;color:' + lgPct + ';">' + new Date(e.date).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) + '</div>' +
+                            '</div>' +
+                            '<div style="font-weight:700;font-size:12px;color:' + color + ';flex-shrink:0;margin-left:10px;">' + formatCurrency(e.amount) + '</div>' +
+                        '</div>';
+                    });
+                    lh += '</div>';
+
+                    lh += '</div>';
                 });
                 lh += '</div>';
                 legendEl.innerHTML = lh;
@@ -4799,34 +4834,11 @@
 
         function renderMonthlyAnalytics() {
             const mk = getMonthKey(), me = expenses[mk] || [];
-            const chart = document.getElementById('categoryChart');
             const ct = {}; let total = 0;
             me.forEach(e => { ct[e.category] = (ct[e.category] || 0) + e.amount; total += e.amount; });
             document.getElementById('monthlyTotal').textContent = formatCurrency(total);
             document.getElementById('pieChartContainer').style.display = 'block';
             drawPieChart(ct, total);
-            const sc = Object.keys(ct).sort((a, b) => ct[b] - ct[a]);
-            if (sc.length === 0) { chart.innerHTML = `<div class="empty-state">
-                <div class="empty-emoji">📊</div>
-                <div class="empty-title">No data to analyze yet</div>
-                <div class="empty-subtitle">Add some expenses and your spending breakdown will appear here</div>
-                <button class="empty-action" onclick="switchTab('expenses'); document.querySelector('.tab').click();">+ Add Expense</button>
-            </div>`; return; }
-            const colors = ['#D4603A','#E8854A','#f093fb','#4facfe','#43e97b','#fa709a','#fee140','#30cfd0','#a8edea','#fed6e3','#c471f5','#12c2e9'];
-            chart.innerHTML = sc.map((c, i) => {
-                const a = ct[c], pct = (a / total) * 100, col = colors[i % colors.length];
-                const ce = me.filter(e => e.category === c);
-                const _d = dk();
-                const elHTML = ce.map(e => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid ${_d ? '#2A1A10' : '#f0f0f0'};"><div><div style="font-weight:500;font-size:13px;color:${_d ? '#F5E8D8' : 'inherit'};">${e.description}</div><div style="font-size:11px;color:${_d ? '#665544' : '#999'};">${new Date(e.date).toLocaleDateString()}</div></div><div style="font-weight:600;color:#D4603A;">${formatCurrency(e.amount)}</div></div>`).join('');
-                return `<div class="category-bar">
-                    <div class="category-header" onclick="toggleCategoryExpenses('monthly-${c}')" style="cursor:pointer;">
-                        <span class="category-name"><span style="display:inline-block;width:12px;height:12px;background:${col};border-radius:2px;margin-right:8px;"></span>${c} (${ce.length})</span>
-                        <span style="display:flex;align-items:center;gap:10px;"><span class="category-amount">${formatCurrency(a)}</span><span id="monthly-${c}-arrow" style="font-size:12px;transition:transform 0.3s;">▼</span></span>
-                    </div>
-                    <div class="category-bar-bg"><div class="category-bar-fill" style="width:${pct}%;background:${col};">${pct.toFixed(1)}%</div></div>
-                    <div id="monthly-${c}-expenses" style="display:none;background:${_d ? '#161620' : '#FDF6F2'};padding:15px;border-radius:8px;margin-top:10px;"><div style="font-weight:600;margin-bottom:10px;color:${_d ? '#F5E8D8' : '#495057'};">📋 All ${c} Expenses</div>${elHTML}</div>
-                </div>`;
-            }).join('');
         }
 
         function toggleCategoryExpenses(id) {
