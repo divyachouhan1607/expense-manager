@@ -4580,8 +4580,13 @@
                 // Get monthly expenses for breakdown
                 const mk = getMonthKey(), me = expenses[mk] || [];
 
-                let lh = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">';
+                const showLimit = 6;
+                const hasMore = data.length > showLimit;
+                let lh = '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px;">';
                 data.forEach(function(d, i) {
+                    if (i === showLimit && hasMore) {
+                        lh += '</div><div id="legendMore" style="display:none;"><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px;">';
+                    }
                     const catName = sc[i];
                     const pct = ((d.value / total) * 100).toFixed(1);
                     const barPct = Math.round((d.value / maxVal) * 100);
@@ -4642,6 +4647,16 @@
                     lh += '</div>';
                 });
                 lh += '</div>';
+                if (hasMore) {
+                    lh += '</div></div>';
+                    var remaining = data.length - showLimit;
+                    var moreColor = isDark ? '#c0b8a8' : '#777';
+                    var moreBg = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)';
+                    lh += '<div style="text-align:center;margin-top:10px;">' +
+                        '<button onclick="var m=document.getElementById(\'legendMore\');if(m.style.display===\'none\'){m.style.display=\'block\';this.textContent=\'Show less ▲\'}else{m.style.display=\'none\';this.textContent=\'+ ' + remaining + ' more categories ▼\'}" ' +
+                        'style="background:' + moreBg + ';border:1.5px solid ' + (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)') + ';color:' + moreColor + ';padding:8px 20px;border-radius:20px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:.2s;">' +
+                        '+ ' + remaining + ' more categories ▼</button></div>';
+                }
                 legendEl.innerHTML = lh;
             }
         }
