@@ -2273,7 +2273,7 @@
         }
     </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.49.0/dist/apexcharts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
 </head>
 <body>
     <div class="toast-container" id="toastContainer"></div>
@@ -2523,8 +2523,8 @@
             </div>
 
             <div class="tip-container" id="tipMonthly"></div>
-            <div id="pieChartContainer" style="max-width: 420px; margin: 20px auto;">
-                <div id="pieChart"></div>
+            <div id="pieChartContainer" style="max-width: 440px; margin: 20px auto;">
+                <div id="pieChart" style="width:100%;height:420px;"></div>
             </div>
 
             <h3 class="section-heading" style="margin: 30px 20px 15px 20px; color: #495057; font-size: 16px; text-align: center;">Detailed Breakdown</h3>
@@ -4416,139 +4416,153 @@
         var _pieChartInstance = null;
         function drawPieChart(ct, total) {
             const el = document.getElementById('pieChart');
-            if (_pieChartInstance) { _pieChartInstance.destroy(); _pieChartInstance = null; }
+            if (_pieChartInstance) { _pieChartInstance.dispose(); _pieChartInstance = null; }
             if (total === 0) {
                 el.innerHTML = '<div style="text-align:center;padding:60px 20px;color:' + (dk() ? '#887755' : '#6c757d') + ';font-size:15px;">No data yet</div>';
                 return;
             }
-            const colors = ['#D4603A','#E8854A','#f093fb','#4facfe','#43e97b','#fa709a','#fee140','#30cfd0','#a8edea','#fed6e3','#c471f5','#12c2e9'];
+            el.innerHTML = '';
+            const chart = echarts.init(el, null, { renderer: 'canvas' });
+            _pieChartInstance = chart;
+
+            const baseColors = ['#D4603A','#E8854A','#f093fb','#4facfe','#43e97b','#fa709a','#fee140','#30cfd0','#c471f5','#12c2e9','#a8edea','#fed6e3'];
             const sc = Object.keys(ct).sort((a, b) => ct[b] - ct[a]);
-            const labels = sc.map(c => {
-                const emoji = (categories.find(function(cat) { return cat.name === c; }) || {}).emoji || '';
-                return emoji + ' ' + c;
-            });
-            const values = sc.map(c => ct[c]);
             const isDark = dk();
             const sym = currencySymbols[currentCurrency] || '₹';
 
-            const opts = {
-                series: values,
-                chart: {
-                    type: 'donut',
-                    height: 380,
-                    background: 'transparent',
-                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                    animations: {
-                        enabled: true,
-                        easing: 'easeinout',
-                        speed: 800,
-                        animateGradually: { enabled: true, delay: 120 },
-                        dynamicAnimation: { enabled: true, speed: 350 }
-                    },
-                    dropShadow: {
-                        enabled: true,
-                        top: 3, left: 0, blur: 8,
-                        color: isDark ? '#000' : '#888',
-                        opacity: isDark ? 0.4 : 0.2
+            const data = sc.map((c, i) => {
+                const emoji = (categories.find(function(cat) { return cat.name === c; }) || {}).emoji || '';
+                const color = baseColors[i % baseColors.length];
+                return {
+                    value: ct[c],
+                    name: emoji + ' ' + c,
+                    itemStyle: {
+                        color: {
+                            type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+                            colorStops: [
+                                { offset: 0, color: color },
+                                { offset: 1, color: shadeColor(color, -30) }
+                            ]
+                        },
+                        shadowBlur: i < 2 ? 20 : 8,
+                        shadowColor: i < 2 ? shadeColor(color, -40) + '80' : 'rgba(0,0,0,0.15)',
+                        shadowOffsetY: i < 2 ? 6 : 2,
+                        borderColor: isDark ? '#1a1a2a' : '#fff',
+                        borderWidth: 2,
+                        borderRadius: 6
                     }
-                },
-                colors: colors.slice(0, sc.length),
-                labels: labels,
-                stroke: {
-                    width: 3,
-                    colors: [isDark ? '#161620' : '#ffffff']
-                },
-                plotOptions: {
-                    pie: {
-                        startAngle: -90,
-                        endAngle: 270,
-                        expandOnClick: true,
-                        offsetY: 0,
-                        donut: {
-                            size: '42%',
-                            labels: {
-                                show: true,
-                                name: {
-                                    show: true,
-                                    fontSize: '14px',
-                                    fontWeight: 600,
-                                    color: isDark ? '#F5E8D8' : '#495057',
-                                    offsetY: -8
-                                },
-                                value: {
-                                    show: true,
-                                    fontSize: '20px',
-                                    fontWeight: 700,
-                                    color: isDark ? '#F5E8D8' : '#333',
-                                    offsetY: 4,
-                                    formatter: function(val) { return sym + parseFloat(val).toLocaleString('en-IN', {maximumFractionDigits: 0}); }
-                                },
-                                total: {
-                                    show: true,
-                                    label: 'Total',
-                                    fontSize: '13px',
-                                    fontWeight: 600,
-                                    color: isDark ? '#887755' : '#888',
-                                    formatter: function(w) {
-                                        return sym + w.globals.seriesTotals.reduce(function(a,b){return a+b},0).toLocaleString('en-IN', {maximumFractionDigits: 0});
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                dataLabels: {
-                    enabled: true,
-                    formatter: function(val) { return val.toFixed(1) + '%'; },
-                    style: {
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        colors: ['#fff']
+                };
+            });
+
+            function shadeColor(hex, pct) {
+                var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+                r = Math.min(255, Math.max(0, Math.round(r * (100 + pct) / 100)));
+                g = Math.min(255, Math.max(0, Math.round(g * (100 + pct) / 100)));
+                b = Math.min(255, Math.max(0, Math.round(b * (100 + pct) / 100)));
+                return '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('');
+            }
+
+            const option = {
+                backgroundColor: 'transparent',
+                title: {
+                    text: sym + total.toLocaleString('en-IN', {maximumFractionDigits: 0}),
+                    subtext: 'Total Spent',
+                    left: 'center', top: 'center',
+                    textStyle: {
+                        fontSize: 22, fontWeight: 700,
+                        color: isDark ? '#F5E8D8' : '#333',
+                        fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif'
                     },
-                    dropShadow: {
-                        enabled: true,
-                        top: 1, left: 0, blur: 3,
-                        color: '#000', opacity: 0.4
+                    subtextStyle: {
+                        fontSize: 12, fontWeight: 500,
+                        color: isDark ? '#887755' : '#999',
+                        fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif'
                     }
-                },
-                legend: {
-                    show: true,
-                    position: 'bottom',
-                    horizontalAlign: 'center',
-                    fontSize: '12px',
-                    fontWeight: 500,
-                    labels: { colors: isDark ? '#c0b8a8' : '#555' },
-                    markers: {
-                        size: 8,
-                        shape: 'circle',
-                        offsetX: -4
-                    },
-                    itemMargin: { horizontal: 8, vertical: 4 }
                 },
                 tooltip: {
-                    enabled: true,
-                    theme: isDark ? 'dark' : 'light',
-                    y: {
-                        formatter: function(val) { return sym + val.toLocaleString('en-IN', {maximumFractionDigits: 0}); }
+                    trigger: 'item',
+                    backgroundColor: isDark ? 'rgba(30,28,40,0.95)' : 'rgba(255,255,255,0.97)',
+                    borderColor: isDark ? '#444' : '#e0e0e0',
+                    borderWidth: 1,
+                    textStyle: {
+                        color: isDark ? '#e0d8c8' : '#333',
+                        fontSize: 13,
+                        fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif'
                     },
-                    style: { fontSize: '13px' }
+                    formatter: function(p) {
+                        return '<b>' + p.name + '</b><br/>' +
+                               sym + p.value.toLocaleString('en-IN', {maximumFractionDigits: 0}) +
+                               ' <span style="opacity:0.6">(' + p.percent.toFixed(1) + '%)</span>';
+                    },
+                    extraCssText: 'border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.2);padding:12px 16px;'
                 },
-                states: {
-                    hover: { filter: { type: 'darken', value: 0.15 } },
-                    active: { filter: { type: 'none' } }
-                },
-                responsive: [{
-                    breakpoint: 480,
-                    options: {
-                        chart: { height: 320 },
-                        legend: { fontSize: '11px' }
+                legend: {
+                    bottom: 0, left: 'center',
+                    orient: 'horizontal',
+                    icon: 'circle',
+                    itemWidth: 10, itemHeight: 10, itemGap: 14,
+                    textStyle: {
+                        color: isDark ? '#b0a898' : '#666',
+                        fontSize: 11,
+                        fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif'
                     }
+                },
+                series: [{
+                    name: 'Expenses',
+                    type: 'pie',
+                    roseType: 'area',
+                    radius: ['28%', '65%'],
+                    center: ['50%', '45%'],
+                    avoidLabelOverlap: true,
+                    itemStyle: {
+                        borderRadius: 8
+                    },
+                    label: {
+                        show: true,
+                        position: 'outside',
+                        formatter: function(p) { return p.percent.toFixed(0) + '%'; },
+                        fontSize: 11,
+                        fontWeight: 700,
+                        color: isDark ? '#c0b8a8' : '#555',
+                        fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
+                        distanceToLabelLine: 4
+                    },
+                    labelLine: {
+                        show: true,
+                        length: 12,
+                        length2: 14,
+                        smooth: 0.3,
+                        lineStyle: {
+                            color: isDark ? '#555' : '#ccc',
+                            width: 1.5
+                        }
+                    },
+                    emphasis: {
+                        scale: true,
+                        scaleSize: 12,
+                        itemStyle: {
+                            shadowBlur: 30,
+                            shadowColor: 'rgba(0,0,0,0.3)',
+                            shadowOffsetY: 8
+                        },
+                        label: {
+                            show: true,
+                            fontSize: 14,
+                            fontWeight: 700,
+                            formatter: function(p) {
+                                return p.name + '\n' + sym + p.value.toLocaleString('en-IN', {maximumFractionDigits: 0});
+                            }
+                        }
+                    },
+                    animationType: 'scale',
+                    animationEasing: 'elasticOut',
+                    animationDelay: function(idx) { return idx * 80; },
+                    data: data
                 }]
             };
 
-            el.innerHTML = '';
-            _pieChartInstance = new ApexCharts(el, opts);
-            _pieChartInstance.render();
+            chart.setOption(option);
+            window.addEventListener('resize', function() { chart.resize(); });
         }
 
         // ===== RECURRING EXPENSE DETECTION =====
