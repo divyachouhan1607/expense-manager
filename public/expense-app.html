@@ -1972,15 +1972,9 @@
         body.dark .modal-confirm-btn:disabled { background: #2A1A10 !important; color: #665544 !important; }
 
         /* ===== Multi-Select Mode ===== */
-        .expense-list-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .expense-list-header .expense-list-toggle {
-            flex: 1;
-        }
         .select-toggle-btn {
+            margin-top: 8px;
+            width: 100%;
             padding: 8px 10px;
             border-radius: 8px;
             border: 1.5px solid #dee2e6;
@@ -2368,14 +2362,12 @@
                 <div class="results-count" id="resultsCount"></div>
             </div>
 
-            <div class="expense-list-header">
-                <button class="expense-list-toggle" id="expenseListToggle" onclick="toggleExpenseList()">
-                    <span id="expenseToggleText">Show Expenses</span>
-                    <span class="toggle-arrow">▼</span>
-                </button>
-                <button class="select-toggle-btn" id="selectToggleBtn" onclick="toggleSelectMode()" style="display:none;">Select</button>
-            </div>
+            <button class="expense-list-toggle" id="expenseListToggle" onclick="toggleExpenseList()">
+                <span id="expenseToggleText">Show Expenses</span>
+                <span class="toggle-arrow">▼</span>
+            </button>
             <div class="expense-list collapsed" id="expenseList"></div>
+            <button class="select-toggle-btn" id="selectToggleBtn" onclick="toggleSelectMode()" style="display:none;">Select</button>
 
             <div class="multi-select-bar" id="multiSelectBar" style="display:none;">
                 <div class="multi-select-info">
@@ -4029,6 +4021,14 @@
             return { main: dateFormatted, sub: dayName };
         }
 
+        function updateSelectBtnVisibility(count) {
+            const list = document.getElementById('expenseList');
+            const selectBtn = document.getElementById('selectToggleBtn');
+            const isExpanded = !list.classList.contains('collapsed');
+            selectBtn.style.display = (isExpanded && count > 0) ? 'block' : 'none';
+            if (!isExpanded && selectMode) toggleSelectMode();
+        }
+
         function toggleExpenseList() {
             const list = document.getElementById('expenseList');
             const btn = document.getElementById('expenseListToggle');
@@ -4036,6 +4036,8 @@
             const isCollapsed = list.classList.toggle('collapsed');
             btn.classList.toggle('open', !isCollapsed);
             text.textContent = isCollapsed ? 'Show Expenses' : 'Hide Expenses';
+            const mk = getMonthKey();
+            updateSelectBtnVisibility((expenses[mk] || []).length);
         }
 
         function renderExpenses() {
@@ -4050,9 +4052,8 @@
             const rc = document.getElementById('resultsCount');
             rc.textContent = hasFilters() ? `Showing ${filtered.length} of ${me.length} expenses` : '';
 
-            // Show/hide Select button based on whether expenses exist
-            const selectBtn = document.getElementById('selectToggleBtn');
-            selectBtn.style.display = me.length > 0 ? 'inline-block' : 'none';
+            // Show/hide Select button — only when expenses are visible
+            updateSelectBtnVisibility(me.length);
 
             if (filtered.length === 0) {
                 if (hasFilters()) {
