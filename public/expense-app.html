@@ -1972,6 +1972,14 @@
         body.dark .modal-confirm-btn:disabled { background: #2A1A10 !important; color: #665544 !important; }
 
         /* ===== Multi-Select Mode ===== */
+        .expense-list-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .expense-list-header .expense-list-toggle {
+            flex: 1;
+        }
         .select-toggle-btn {
             padding: 8px 10px;
             border-radius: 8px;
@@ -2327,7 +2335,6 @@
             <div class="search-filter-section">
                 <div class="search-bar">
                     <input type="text" id="searchInput" placeholder="🔍 Search expenses..." oninput="applyFilters()">
-                    <button class="select-toggle-btn" id="selectToggleBtn" onclick="toggleSelectMode()">Select</button>
                     <button class="filter-toggle-btn" id="filterToggleBtn" onclick="toggleFilterPanel()">⚙️</button>
                 </div>
 
@@ -2361,10 +2368,13 @@
                 <div class="results-count" id="resultsCount"></div>
             </div>
 
-            <button class="expense-list-toggle" id="expenseListToggle" onclick="toggleExpenseList()">
-                <span id="expenseToggleText">Show Expenses</span>
-                <span class="toggle-arrow">▼</span>
-            </button>
+            <div class="expense-list-header">
+                <button class="expense-list-toggle" id="expenseListToggle" onclick="toggleExpenseList()">
+                    <span id="expenseToggleText">Show Expenses</span>
+                    <span class="toggle-arrow">▼</span>
+                </button>
+                <button class="select-toggle-btn" id="selectToggleBtn" onclick="toggleSelectMode()" style="display:none;">Select</button>
+            </div>
             <div class="expense-list collapsed" id="expenseList"></div>
 
             <div class="multi-select-bar" id="multiSelectBar" style="display:none;">
@@ -4039,6 +4049,10 @@
             const filtered = hasFilters() ? filterList(me) : me;
             const rc = document.getElementById('resultsCount');
             rc.textContent = hasFilters() ? `Showing ${filtered.length} of ${me.length} expenses` : '';
+
+            // Show/hide Select button based on whether expenses exist
+            const selectBtn = document.getElementById('selectToggleBtn');
+            selectBtn.style.display = me.length > 0 ? 'inline-block' : 'none';
 
             if (filtered.length === 0) {
                 if (hasFilters()) {
