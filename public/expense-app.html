@@ -2190,6 +2190,7 @@
                 <div class="form-group">
                     <label>Category</label>
                     <div class="cat-scroll-row" id="quickCategories"></div>
+                    <div id="categoryError" style="display:none;color:#dc3545;font-size:12px;font-weight:600;margin-top:4px;">Please pick a category before adding!</div>
                     <select id="category" style="display:none;">
                         <option value="">Select category</option>
                     </select>
@@ -2732,6 +2733,7 @@
 
         function selectQuickCategory(name) {
             document.getElementById('category').value = name;
+            document.getElementById('categoryError').style.display = 'none';
             const cat = categories.find(c => c.name === name);
             updateQuickCategorySelection(name);
             showSelectedCategory(cat);
@@ -3733,7 +3735,9 @@
             const date = document.getElementById('date').value;
             if (!category) {
                 const row = document.getElementById('quickCategories');
+                const err = document.getElementById('categoryError');
                 row.style.animation = 'none'; row.offsetHeight; row.style.animation = 'catShake 0.4s ease';
+                err.style.display = 'block';
                 row.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return;
             }
