@@ -4884,8 +4884,8 @@
         }
 
         function clearAllData() {
-            if (confirm('This will delete ALL expenses and budgets. Are you sure?')) {
-                if (confirm('This action cannot be undone. Really delete everything?')) {
+            if (confirm('🔥 Burn all the records?? No going back!!')) {
+                if (confirm('Every expense, budget, and category — gone forever. Still sure?')) {
                     expenses = {}; budgets = {}; categories = [...defaultCategories];
                     saveData(); updateCategoryDropdowns(); renderCategories(); renderQuickCategories(); updateFilterCategoryDropdown();
                     renderExpenses(); renderBudgets(); renderMonthlyAnalytics(); renderMiniDashboard(); showToast('All data cleared!', 'success');
