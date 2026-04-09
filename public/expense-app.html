@@ -3107,7 +3107,17 @@
             return f.text || f.cat || f.dateFrom || f.dateTo || f.minAmt || f.maxAmt;
         }
 
-        function applyFilters() { renderExpenses(); renderFilterChips(); }
+        function applyFilters() {
+            const list = document.getElementById('expenseList');
+            const btn = document.getElementById('expenseListToggle');
+            const text = document.getElementById('expenseToggleText');
+            if (hasFilters() && list.classList.contains('collapsed')) {
+                list.classList.remove('collapsed');
+                btn.classList.add('open');
+                text.textContent = 'Hide Expenses';
+            }
+            renderExpenses(); renderFilterChips();
+        }
 
         function clearFilters() {
             ['searchInput','filterCategory','filterDateFrom','filterDateTo','filterAmountMin','filterAmountMax']
