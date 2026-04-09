@@ -2524,7 +2524,8 @@
 
             <div class="tip-container" id="tipMonthly"></div>
             <div id="pieChartContainer" style="max-width: 440px; margin: 20px auto;">
-                <div id="pieChart" style="width:100%;height:420px;"></div>
+                <div id="pieChart" style="width:100%;height:380px;"></div>
+                <div id="pieLegend" style="padding:0 10px;"></div>
             </div>
 
             <h3 class="section-heading" style="margin: 30px 20px 15px 20px; color: #495057; font-size: 16px; text-align: center;">Detailed Breakdown</h3>
@@ -4499,17 +4500,7 @@
                     },
                     extraCssText: 'border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.2);padding:12px 16px;'
                 },
-                legend: {
-                    bottom: 0, left: 'center',
-                    orient: 'horizontal',
-                    icon: 'circle',
-                    itemWidth: 10, itemHeight: 10, itemGap: 14,
-                    textStyle: {
-                        color: isDark ? '#b0a898' : '#666',
-                        fontSize: 11,
-                        fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif'
-                    }
-                },
+                legend: { show: false },
                 series: [{
                     name: 'Expenses',
                     type: 'pie',
@@ -4566,6 +4557,36 @@
 
             chart.setOption(option);
             window.addEventListener('resize', function() { chart.resize(); });
+
+            // Custom rich legend
+            const legendEl = document.getElementById('pieLegend');
+            if (legendEl) {
+                const lgBg = isDark ? 'rgba(30,28,40,0.5)' : 'rgba(245,240,235,0.6)';
+                const lgBd = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+                const lgTxt = isDark ? '#c0b8a8' : '#555';
+                const lgAmt = isDark ? '#F5E8D8' : '#333';
+                const lgPct = isDark ? '#887755' : '#999';
+                let lh = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px;">';
+                data.forEach(function(d, i) {
+                    const pct = ((d.value / total) * 100).toFixed(1);
+                    const color = baseColors[i % baseColors.length];
+                    const amt = sym + d.value.toLocaleString('en-IN', {maximumFractionDigits: 0});
+                    lh += '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:' + lgBg + ';border:1px solid ' + lgBd + ';border-radius:10px;cursor:pointer;transition:all .2s;" ' +
+                        'onmouseenter="this.style.transform=\'translateY(-1px)\';this.style.boxShadow=\'0 4px 12px rgba(0,0,0,0.1)\'" ' +
+                        'onmouseleave="this.style.transform=\'none\';this.style.boxShadow=\'none\'">' +
+                        '<div style="width:10px;height:10px;border-radius:50%;background:' + color + ';flex-shrink:0;box-shadow:0 0 6px ' + color + '60;"></div>' +
+                        '<div style="flex:1;min-width:0;overflow:hidden;">' +
+                            '<div style="font-size:11px;font-weight:600;color:' + lgTxt + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + d.name + '</div>' +
+                        '</div>' +
+                        '<div style="text-align:right;flex-shrink:0;">' +
+                            '<div style="font-size:12px;font-weight:700;color:' + lgAmt + ';font-family:\'Playfair Display\',serif;">' + amt + '</div>' +
+                            '<div style="font-size:9px;font-weight:600;color:' + lgPct + ';">' + pct + '%</div>' +
+                        '</div>' +
+                    '</div>';
+                });
+                lh += '</div>';
+                legendEl.innerHTML = lh;
+            }
         }
 
         // ===== RECURRING EXPENSE DETECTION =====
