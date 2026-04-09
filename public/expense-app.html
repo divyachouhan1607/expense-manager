@@ -1956,6 +1956,19 @@
 
         body.dark #currencyPreview { background: #161620 !important; border-color: #D4603A !important; }
         body.dark #currencyPreviewAmount { color: #E8854A !important; }
+        body.dark #currencyPreview > div:first-child { color: #887755 !important; }
+
+        /* Dark mode for inline-styled headings and labels */
+        body.dark .form-heading { color: #F5E8D8 !important; }
+        body.dark .form-subheading { color: #887755 !important; }
+        body.dark .section-heading { color: #E0BB8A !important; }
+        body.dark .inline-label { color: #E0BB8A !important; }
+        body.dark .inline-input { background: #161620 !important; border-color: #2A1A10 !important; color: #F5E8D8 !important; }
+        body.dark .or-divider-line { border-top-color: #2A1A10 !important; }
+        body.dark .or-divider-text { background: #0A0A0F !important; color: #887755 !important; }
+        body.dark .border-divider { border-top-color: #2A1A10 !important; }
+
+        body.dark .modal-confirm-btn:disabled { background: #2A1A10 !important; color: #665544 !important; }
 
         /* ===== Toast Notifications ===== */
         .toast-container {
@@ -2164,8 +2177,8 @@
             <div class="voice-status" id="voiceStatus"></div>
 
             <div style="margin-bottom:16px;">
-                <h3 style="font-size:18px;font-weight:700;color:#1a1a1a;margin:0 0 2px;">Spent something?</h3>
-                <p style="font-size:13px;color:#9ca3af;margin:0;">Tell us before you forget (again).</p>
+                <h3 class="form-heading" style="font-size:18px;font-weight:700;color:#1a1a1a;margin:0 0 2px;">Spent something?</h3>
+                <p class="form-subheading" style="font-size:13px;color:#9ca3af;margin:0;">Tell us before you forget (again).</p>
             </div>
 
             <form onsubmit="addExpense(event)">
@@ -2254,17 +2267,17 @@
 
             <!-- Total Monthly Budget -->
             <div style="margin-bottom: 18px;">
-                <label style="display:block; margin-bottom:5px; color:#495057; font-weight:600; font-size:14px;">Total Monthly Budget</label>
+                <label class="inline-label" style="display:block; margin-bottom:5px; color:#495057; font-weight:600; font-size:14px;">Total Monthly Budget</label>
                 <div style="display:flex; gap:8px;">
-                    <input type="number" id="totalBudgetAmount" step="0.01" placeholder="0.00" style="flex:1; padding:12px; border:2px solid #dee2e6; border-radius:8px; font-size:16px;">
+                    <input type="number" id="totalBudgetAmount" step="0.01" placeholder="0.00" class="inline-input" style="flex:1; padding:12px; border:2px solid #dee2e6; border-radius:8px; font-size:16px;">
                     <button class="btn btn-primary" onclick="setTotalBudget()" style="width:auto; padding:12px 20px;">Set</button>
                 </div>
                 <div id="totalBudgetDisplay" style="font-size:12px; color:#888; margin-top:5px;"></div>
             </div>
 
             <div style="position:relative; text-align:center; margin:20px 0 15px;">
-                <hr style="border:none; border-top:1px solid #dee2e6;">
-                <span style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:#FFFBF8; padding:0 10px; font-size:12px; color:#888; font-weight:600;">OR SET PER CATEGORY</span>
+                <hr class="or-divider-line" style="border:none; border-top:1px solid #dee2e6;">
+                <span class="or-divider-text" style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:#FFFBF8; padding:0 10px; font-size:12px; color:#888; font-weight:600;">OR SET PER CATEGORY</span>
             </div>
 
             <form id="budgetForm" onsubmit="setBudget(event)">
@@ -2321,7 +2334,7 @@
                 <canvas id="pieChart" style="max-width: 100%; height: auto;"></canvas>
             </div>
 
-            <h3 style="margin: 30px 20px 15px 20px; color: #495057; font-size: 16px; text-align: center;">Detailed Breakdown</h3>
+            <h3 class="section-heading" style="margin: 30px 20px 15px 20px; color: #495057; font-size: 16px; text-align: center;">Detailed Breakdown</h3>
 
             <div class="category-chart" id="categoryChart"></div>
         </div>
@@ -2341,18 +2354,18 @@
                 <button onclick="changeAnalyticsYear(1)">▶</button>
             </div>
 
-            <h3 style="margin: 20px 0 10px; color: #495057; font-size: 16px; text-align: center;">📊 Monthly Spending</h3>
+            <h3 class="section-heading" style="margin: 20px 0 10px; color: #495057; font-size: 16px; text-align: center;">📊 Monthly Spending</h3>
             <div style="max-width: 100%; margin: 0 auto 20px; overflow-x: auto;">
                 <canvas id="yearlyChart" width="600" height="400"></canvas>
             </div>
 
             <div id="yearlyBreakdown"></div>
 
-            <div style="margin-top: 40px; padding-top: 30px; border-top: 2px solid #dee2e6;">
-                <h3 style="margin: 0 0 20px 0; color: #495057; font-size: 18px; text-align: center;">📈 Category-wise Trends</h3>
+            <div class="border-divider" style="margin-top: 40px; padding-top: 30px; border-top: 2px solid #dee2e6;">
+                <h3 class="section-heading" style="margin: 0 0 20px 0; color: #495057; font-size: 18px; text-align: center;">📈 Category-wise Trends</h3>
                 <div class="form-group">
                     <label>Select Category to Analyze</label>
-                    <select id="yearlyCategory" onchange="renderCategoryYearlyTrend()" style="width: 100%; padding: 12px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 16px;">
+                    <select id="yearlyCategory" onchange="renderCategoryYearlyTrend()" class="inline-input" style="width: 100%; padding: 12px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 16px;">
                         <option value="">All Categories</option>
                     </select>
                 </div>
@@ -2373,7 +2386,7 @@
                 <h3 style="margin: 0 0 15px 0; color: var(--text-primary, #495057); font-size: 16px; font-weight: 600;">💱 Currency</h3>
                 <div class="form-group">
                     <label>Select Currency</label>
-                    <select id="currencySelect" onchange="updateCurrency()" style="width: 100%; padding: 12px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 16px;">
+                    <select id="currencySelect" onchange="updateCurrency()" class="inline-input" style="width: 100%; padding: 12px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 16px;">
                         <option value="INR">🇮🇳 Indian Rupee (₹)</option>
                         <option value="USD">🇺🇸 US Dollar ($)</option>
                         <option value="EUR">🇪🇺 Euro (€)</option>
@@ -2394,13 +2407,13 @@
                         <option value="TRY">🇹🇷 Turkish Lira (₺)</option>
                     </select>
                 </div>
-                <div id="currencyPreview" style="background: white; padding: 15px; border-radius: 8px; margin-top: 15px; border: 2px solid #D4603A;">
+                <div id="currencyPreview" style="padding: 15px; border-radius: 8px; margin-top: 15px; border: 2px solid #D4603A; background: white;">
                     <div style="font-size: 12px; color: #6c757d; margin-bottom: 5px;">Preview:</div>
                     <div style="font-size: 24px; font-weight: bold; color: #D4603A;" id="currencyPreviewAmount">₹1,234.56</div>
                 </div>
             </div>
 
-            <h3 style="margin: 0 0 15px 0; color: #495057; font-size: 16px; font-weight: 600;">➕ Add a New Category</h3>
+            <h3 class="section-heading" style="margin: 0 0 15px 0; color: #495057; font-size: 16px; font-weight: 600;">➕ Add a New Category</h3>
             <form onsubmit="addCategory(event)">
                 <div class="form-group">
                     <label>Category Name</label>
@@ -2496,6 +2509,13 @@
             const isDark = document.body.classList.toggle('dark');
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
             updateThemeIcon(isDark);
+            // Re-render charts and dynamic content with correct theme colors
+            if (typeof currentTab !== 'undefined') {
+                if (currentTab === 'monthly') renderMonthlyAnalytics();
+                else if (currentTab === 'yearly') renderYearlyAnalytics();
+                else if (currentTab === 'expenses') renderExpenses();
+                else if (currentTab === 'budgets') renderBudgets();
+            }
         }
 
         function updateThemeIcon(isDark) {
@@ -3472,6 +3492,8 @@
             return symbol + Math.round(amount);
         }
 
+        function dk() { return document.body.classList.contains('dark'); }
+
         function drawYearlyChart() {
             const canvas = document.getElementById('yearlyChart');
             const ctx = canvas.getContext('2d');
@@ -3484,12 +3506,12 @@
                 mt.push(t); max = Math.max(max, t);
             }
             if (max === 0) {
-                ctx.fillStyle = '#6c757d'; ctx.font = '16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+                ctx.fillStyle = dk() ? '#887755' : '#6c757d'; ctx.font = '16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
                 ctx.textAlign = 'center'; ctx.fillText('No expenses for this year', 300, 200); return;
             }
             const p = 50, cw = canvas.width - p * 2, ch = canvas.height - p * 2, bw = cw / 12 - 10;
             const sym = currencySymbols[currentCurrency] || '₹';
-            ctx.strokeStyle = '#dee2e6'; ctx.lineWidth = 2;
+            ctx.strokeStyle = dk() ? '#2A1A10' : '#dee2e6'; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.moveTo(p, p); ctx.lineTo(p, canvas.height - p); ctx.lineTo(canvas.width - p, canvas.height - p); ctx.stroke();
 
             mt.forEach((a, i) => {
@@ -3497,11 +3519,11 @@
                 const g = ctx.createLinearGradient(x, y, x, canvas.height - p);
                 g.addColorStop(0, '#D4603A'); g.addColorStop(1, '#E8854A');
                 ctx.fillStyle = g; ctx.fillRect(x, y, bw, bh);
-                ctx.fillStyle = '#495057'; ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+                ctx.fillStyle = dk() ? '#E0BB8A' : '#495057'; ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
                 ctx.textAlign = 'center'; ctx.fillText(mn[i], x + bw / 2, canvas.height - p + 20);
                 if (bh > 30 && a > 0) { ctx.fillStyle = 'white'; ctx.font = 'bold 10px -apple-system'; ctx.fillText(abbreviateAmount(a, sym), x + bw / 2, y + 15); }
             });
-            ctx.fillStyle = '#6c757d'; ctx.font = '11px -apple-system'; ctx.textAlign = 'right';
+            ctx.fillStyle = dk() ? '#887755' : '#6c757d'; ctx.font = '11px -apple-system'; ctx.textAlign = 'right';
             for (let i = 0; i <= 5; i++) { const v = Math.round((max / 5) * i), y = canvas.height - p - (ch / 5) * i; ctx.fillText(abbreviateAmount(v, sym), p - 10, y + 4); }
         }
 
@@ -3543,13 +3565,13 @@
                 const t = ce.reduce((s, e) => s + e.amount, 0);
                 md.push({ month: m, total: t, count: ce.length }); cyt += t;
             }
-            if (cyt === 0) { div.innerHTML = `<div style="text-align:center;padding:40px;color:#6c757d;"><div style="font-size:40px;margin-bottom:10px;">📊</div><div>No ${sel} expenses in ${analyticsYear}</div></div>`; return; }
+            if (cyt === 0) { div.innerHTML = `<div style="text-align:center;padding:40px;color:${dk() ? '#887755' : '#6c757d'};"><div style="font-size:40px;margin-bottom:10px;">📊</div><div>No ${sel} expenses in ${analyticsYear}</div></div>`; return; }
             const canvas = document.createElement('canvas'); canvas.width = 600; canvas.height = 300;
             const ctx = canvas.getContext('2d');
             const p = 50, cw = canvas.width - p * 2, ch = canvas.height - p * 2;
             const maxA = Math.max(...md.map(d => d.total));
             const sym = currencySymbols[currentCurrency] || '₹';
-            ctx.strokeStyle = '#dee2e6'; ctx.lineWidth = 2;
+            ctx.strokeStyle = dk() ? '#2A1A10' : '#dee2e6'; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.moveTo(p, p); ctx.lineTo(p, canvas.height - p); ctx.lineTo(canvas.width - p, canvas.height - p); ctx.stroke();
             ctx.strokeStyle = '#D4603A'; ctx.lineWidth = 3; ctx.beginPath();
             md.forEach((d, i) => { const x = p + i * (cw / 12) + (cw / 24), y = canvas.height - p - (d.total / maxA) * ch; i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
@@ -3557,20 +3579,21 @@
             md.forEach((d, i) => {
                 const x = p + i * (cw / 12) + (cw / 24), y = canvas.height - p - (d.total / maxA) * ch;
                 ctx.fillStyle = '#D4603A'; ctx.beginPath(); ctx.arc(x, y, 6, 0, 2 * Math.PI); ctx.fill();
-                ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(x, y, 3, 0, 2 * Math.PI); ctx.fill();
-                ctx.fillStyle = '#495057'; ctx.font = '11px -apple-system'; ctx.textAlign = 'center'; ctx.fillText(mn[i], x, canvas.height - p + 20);
+                ctx.fillStyle = dk() ? '#161620' : 'white'; ctx.beginPath(); ctx.arc(x, y, 3, 0, 2 * Math.PI); ctx.fill();
+                ctx.fillStyle = dk() ? '#E0BB8A' : '#495057'; ctx.font = '11px -apple-system'; ctx.textAlign = 'center'; ctx.fillText(mn[i], x, canvas.height - p + 20);
                 if (d.total > 0) { ctx.fillStyle = '#D4603A'; ctx.font = 'bold 10px -apple-system'; ctx.fillText(abbreviateAmount(d.total, sym), x, y - 10); }
             });
-            ctx.fillStyle = '#6c757d'; ctx.font = '10px -apple-system'; ctx.textAlign = 'right';
+            ctx.fillStyle = dk() ? '#887755' : '#6c757d'; ctx.font = '10px -apple-system'; ctx.textAlign = 'right';
             for (let i = 0; i <= 5; i++) { const v = Math.round((maxA / 5) * i), y = canvas.height - p - (ch / 5) * i; ctx.fillText(abbreviateAmount(v, sym), p - 10, y + 4); }
             const avg = cyt / 12, am = md.filter(d => d.total > 0).length, tt = md.reduce((s, d) => s + d.count, 0);
-            div.innerHTML = `<div style="background:#FDF6F2;padding:20px;border-radius:10px;margin-bottom:15px;">
-                <div style="font-weight:600;font-size:16px;color:#495057;margin-bottom:15px;">${sel} Spending in ${analyticsYear}</div>
+            const _d = dk();
+            div.innerHTML = `<div style="background:${_d ? '#161620' : '#FDF6F2'};padding:20px;border-radius:10px;margin-bottom:15px;">
+                <div style="font-weight:600;font-size:16px;color:${_d ? '#F5E8D8' : '#495057'};margin-bottom:15px;">${sel} Spending in ${analyticsYear}</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
-                    <div><div style="font-size:11px;color:#6c757d;">Total Spent</div><div style="font-size:20px;font-weight:bold;color:#D4603A;">${formatCurrency(cyt)}</div></div>
-                    <div><div style="font-size:11px;color:#6c757d;">Avg per Month</div><div style="font-size:20px;font-weight:bold;color:#D4603A;">${formatCurrency(avg)}</div></div>
-                    <div><div style="font-size:11px;color:#6c757d;">Active Months</div><div style="font-size:20px;font-weight:bold;color:#D4603A;">${am}/12</div></div>
-                    <div><div style="font-size:11px;color:#6c757d;">Transactions</div><div style="font-size:20px;font-weight:bold;color:#D4603A;">${tt}</div></div>
+                    <div><div style="font-size:11px;color:${_d ? '#887755' : '#6c757d'};">Total Spent</div><div style="font-size:20px;font-weight:bold;color:#D4603A;">${formatCurrency(cyt)}</div></div>
+                    <div><div style="font-size:11px;color:${_d ? '#887755' : '#6c757d'};">Avg per Month</div><div style="font-size:20px;font-weight:bold;color:#D4603A;">${formatCurrency(avg)}</div></div>
+                    <div><div style="font-size:11px;color:${_d ? '#887755' : '#6c757d'};">Active Months</div><div style="font-size:20px;font-weight:bold;color:#D4603A;">${am}/12</div></div>
+                    <div><div style="font-size:11px;color:${_d ? '#887755' : '#6c757d'};">Transactions</div><div style="font-size:20px;font-weight:bold;color:#D4603A;">${tt}</div></div>
                 </div></div>`;
             div.appendChild(canvas);
         }
@@ -4055,8 +4078,8 @@
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, size, size);
             if (total === 0) {
-                ctx.fillStyle = '#e9ecef'; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2 * Math.PI); ctx.fill();
-                ctx.fillStyle = '#6c757d'; ctx.font = '16px -apple-system'; ctx.textAlign = 'center'; ctx.fillText('No data yet', cx, cy); return;
+                ctx.fillStyle = dk() ? '#2A1A10' : '#e9ecef'; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2 * Math.PI); ctx.fill();
+                ctx.fillStyle = dk() ? '#887755' : '#6c757d'; ctx.font = '16px -apple-system'; ctx.textAlign = 'center'; ctx.fillText('No data yet', cx, cy); return;
             }
             const colors = ['#D4603A','#E8854A','#f093fb','#4facfe','#43e97b','#fa709a','#fee140','#30cfd0','#a8edea','#fed6e3','#c471f5','#12c2e9'];
             const sc = Object.keys(ct).sort((a, b) => ct[b] - ct[a]);
@@ -4065,12 +4088,12 @@
             sc.forEach((c, i) => {
                 const sl = (ct[c] / total) * 2 * Math.PI;
                 ctx.fillStyle = colors[i % colors.length]; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, r, ang, ang + sl); ctx.closePath(); ctx.fill();
-                ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.stroke();
+                ctx.strokeStyle = dk() ? '#161620' : 'white'; ctx.lineWidth = 3; ctx.stroke();
                 const emoji = (categories.find(function(cat) { return cat.name === c; }) || {}).emoji || '';
                 slices.push({ midAngle: ang + sl / 2, pct: (ct[c] / total) * 100, emoji: emoji, name: c });
                 ang += sl;
             });
-            ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(cx, cy, ir, 0, 2 * Math.PI); ctx.fill();
+            ctx.fillStyle = dk() ? '#161620' : 'white'; ctx.beginPath(); ctx.arc(cx, cy, ir, 0, 2 * Math.PI); ctx.fill();
             // Draw emoji + % labels on slices
             const labelR = (r + ir) / 2;
             const emojiFont = Math.max(14, size * 0.055);
@@ -4088,7 +4111,7 @@
                 ctx.fillStyle = 'white';
                 ctx.fillText(s.pct.toFixed(0) + '%', lx, ly + emojiFont * 0.5);
             });
-            ctx.fillStyle = '#495057';
+            ctx.fillStyle = dk() ? '#F5E8D8' : '#495057';
             const tf = Math.max(14, size * 0.05), vf = Math.max(16, size * 0.06);
             ctx.font = `bold ${tf}px -apple-system`; ctx.textAlign = 'center'; ctx.fillText('Total', cx, cy - 5);
             ctx.font = `bold ${vf}px -apple-system`; ctx.fillText((currencySymbols[currentCurrency] || '₹') + total.toFixed(0), cx, cy + vf - 2);
@@ -4299,14 +4322,15 @@
             chart.innerHTML = sc.map((c, i) => {
                 const a = ct[c], pct = (a / total) * 100, col = colors[i % colors.length];
                 const ce = me.filter(e => e.category === c);
-                const elHTML = ce.map(e => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;"><div><div style="font-weight:500;font-size:13px;">${e.description}</div><div style="font-size:11px;color:#999;">${new Date(e.date).toLocaleDateString()}</div></div><div style="font-weight:600;color:#D4603A;">${formatCurrency(e.amount)}</div></div>`).join('');
+                const _d = dk();
+                const elHTML = ce.map(e => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid ${_d ? '#2A1A10' : '#f0f0f0'};"><div><div style="font-weight:500;font-size:13px;color:${_d ? '#F5E8D8' : 'inherit'};">${e.description}</div><div style="font-size:11px;color:${_d ? '#665544' : '#999'};">${new Date(e.date).toLocaleDateString()}</div></div><div style="font-weight:600;color:#D4603A;">${formatCurrency(e.amount)}</div></div>`).join('');
                 return `<div class="category-bar">
                     <div class="category-header" onclick="toggleCategoryExpenses('monthly-${c}')" style="cursor:pointer;">
                         <span class="category-name"><span style="display:inline-block;width:12px;height:12px;background:${col};border-radius:2px;margin-right:8px;"></span>${c} (${ce.length})</span>
                         <span style="display:flex;align-items:center;gap:10px;"><span class="category-amount">${formatCurrency(a)}</span><span id="monthly-${c}-arrow" style="font-size:12px;transition:transform 0.3s;">▼</span></span>
                     </div>
                     <div class="category-bar-bg"><div class="category-bar-fill" style="width:${pct}%;background:${col};">${pct.toFixed(1)}%</div></div>
-                    <div id="monthly-${c}-expenses" style="display:none;background:#FDF6F2;padding:15px;border-radius:8px;margin-top:10px;"><div style="font-weight:600;margin-bottom:10px;color:#495057;">📋 All ${c} Expenses</div>${elHTML}</div>
+                    <div id="monthly-${c}-expenses" style="display:none;background:${_d ? '#161620' : '#FDF6F2'};padding:15px;border-radius:8px;margin-top:10px;"><div style="font-weight:600;margin-bottom:10px;color:${_d ? '#F5E8D8' : '#495057'};">📋 All ${c} Expenses</div>${elHTML}</div>
                 </div>`;
             }).join('');
         }
