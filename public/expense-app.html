@@ -3803,6 +3803,7 @@
                 },
                 yAxis: {
                     type: 'value',
+                    min: isMobile ? 0 : undefined,
                     splitLine: { lineStyle: { color: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)', type: [4, 6] } },
                     axisLine: { show: false },
                     axisTick: { show: false },
@@ -3814,8 +3815,8 @@
                     }
                 },
                 series: [
-                // Reflection bars (mirrored, faint)
-                {
+                // Reflection bars (mirrored, faint) — desktop only
+                !isMobile ? {
                     type: 'bar',
                     data: mt.map(function(v) { return v > 0 ? -v * 0.15 : 0; }),
                     barWidth: isMobile ? '70%' : '55%',
@@ -3832,7 +3833,7 @@
                         borderRadius: [0, 0, 4, 4]
                     },
                     label: { show: false }, tooltip: { show: false }, silent: true
-                },
+                } : null,
                 // Main bars (glassmorphism)
                 {
                     type: 'bar',
