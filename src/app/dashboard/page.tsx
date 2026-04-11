@@ -1,5 +1,6 @@
-import { auth, signOut } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { SignOutButton } from "@/components/sign-out-button";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -26,19 +27,9 @@ export default async function DashboardPage() {
               </span>
             </div>
           </div>
-          <form
-            action={async () => {
-              "use server";
-              await signOut({ redirectTo: "/login" });
-            }}
-          >
-            <button
-              type="submit"
-              className="rounded-full bg-white/15 border border-white/25 px-4 py-1.5 text-sm font-medium text-white transition-all hover:bg-white/25 active:scale-95"
-            >
-              Sign out
-            </button>
-          </form>
+          <SignOutButton className="rounded-full bg-white/15 border border-white/25 px-4 py-1.5 text-sm font-medium text-white transition-all hover:bg-white/25 active:scale-95">
+            Sign out
+          </SignOutButton>
         </div>
       </header>
 

@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "in.kharchasaathi.app",
+      "sha256_cert_fingerprints": [
+        "B8:CB:76:FF:31:8C:B7:7D:BE:E7:4D:4F:01:34:E3:D4:18:57:17:A1:FC:7E:9A:AF:9E:3A:57:39:6E:C3:92:55"
+      ]
+    }
+  }
+]

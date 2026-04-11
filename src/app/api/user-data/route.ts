@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET() {
   const session = await auth();
@@ -8,12 +8,14 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { appData: true },
-  });
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("user_settings")
+    .select("settings")
+    .eq("user_id", session.user.id)
+    .single();
 
-  return NextResponse.json({ data: user?.appData ?? null });
+  return NextResponse.json({ data: data?.settings ?? null });
 }
 
 export async function POST(req: NextRequest) {
@@ -24,9 +26,11 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json();
 
-  await db.user.update({
-    where: { id: session.user.id },
-    data: { appData: body },
+  const supabase = await createClient();
+  await supabase.from("user_settings").upsert({
+    user_id: session.user.id,
+    settings: body,
+    updated_at: new Date().toISOString(),
   });
 
   return NextResponse.json({ success: true });

@@ -2033,6 +2033,68 @@
         body.dark .burn-cancel-btn { background: #2A1A10; border-color: #2A1A10; color: #E0BB8A; }
         body.dark .burn-confirm-btn { box-shadow: 0 4px 15px rgba(220,53,69,0.4); }
 
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+
+        /* ===== Settings Sections ===== */
+        .settings-section {
+            background: var(--card-bg, #fff);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color, #f0f0f0);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        body.dark .settings-section { background: #161620; border-color: #2A1A10; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .settings-section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .settings-section-icon {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(212,96,58,0.1), rgba(232,133,74,0.06));
+            flex-shrink: 0;
+        }
+        .settings-section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary, #333);
+        }
+        body.dark .settings-section-title { color: #F5E8D8; }
+        .settings-section-subtitle {
+            font-size: 12px;
+            color: var(--text-secondary, #999);
+            margin-top: 1px;
+        }
+        body.dark .settings-section-subtitle { color: #887755; }
+        .settings-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color, #eee);
+            border-radius: 12px;
+            font-size: 15px;
+            background: var(--input-bg, #fff);
+            color: var(--text-primary, #333);
+            transition: border-color 0.2s;
+        }
+        .settings-select:focus { border-color: #D4603A; outline: none; }
+        body.dark .settings-select { background: #1e1e2e; border-color: #2A1A10; color: #F5E8D8; }
+        .settings-preview-card {
+            text-align: center;
+            padding: 16px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(212,96,58,0.06), rgba(232,133,74,0.03));
+            border: 1.5px dashed rgba(212,96,58,0.25);
+        }
+        body.dark .settings-preview-card { background: rgba(212,96,58,0.08); border-color: rgba(212,96,58,0.2); }
+
         /* ===== Multi-Select Mode ===== */
 
         .expense-checkbox {
@@ -2560,14 +2622,13 @@
             <div id="yearlyBreakdown"></div>
 
             <div class="border-divider" style="margin-top: 40px; padding-top: 30px; border-top: 2px solid #dee2e6;">
-                <h3 class="section-heading" style="margin: 0 0 20px 0; color: #495057; font-size: 18px; text-align: center;">📈 Category-wise Trends</h3>
-                <div class="form-group">
-                    <label>Select Category to Analyze</label>
-                    <select id="yearlyCategory" onchange="renderCategoryYearlyTrend()" class="inline-input" style="width: 100%; padding: 12px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 16px;">
-                        <option value="">All Categories</option>
-                    </select>
+                <h3 class="section-heading" style="margin: 0 0 8px 0; color: #495057; font-size: 18px; text-align: center;">📈 Category-wise Trends</h3>
+                <p style="text-align:center;font-size:12px;color:#999;margin:0 0 16px;">Tap a category to see its yearly trend</p>
+                <div id="categoryYearlyChart"></div>
+                <div style="position:relative;">
+                    <div id="categorySparklines" style="margin-bottom:20px;"></div>
+                    <div id="pillFadeHint" style="display:none;position:absolute;right:0;top:0;bottom:8px;width:40px;pointer-events:none;background:linear-gradient(to right,transparent,var(--bg-main,#FDF6F2));border-radius:0 0 10px 0;"></div>
                 </div>
-                <div id="categoryYearlyChart" style="margin-top: 20px;"></div>
             </div>
         </div>
 
@@ -2580,68 +2641,89 @@
 
             <div class="tip-container" id="tipSettings"></div>
 
-            <div style="background: var(--card-bg, #FDF6F2); padding: 20px; border-radius: 10px; margin-bottom: 30px;">
-                <h3 style="margin: 0 0 15px 0; color: var(--text-primary, #495057); font-size: 16px; font-weight: 600;">💱 Currency</h3>
-                <div class="form-group">
-                    <label>Select Currency</label>
-                    <select id="currencySelect" onchange="updateCurrency()" class="inline-input" style="width: 100%; padding: 12px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 16px;">
-                        <option value="INR">🇮🇳 Indian Rupee (₹)</option>
-                        <option value="USD">🇺🇸 US Dollar ($)</option>
-                        <option value="EUR">🇪🇺 Euro (€)</option>
-                        <option value="GBP">🇬🇧 British Pound (£)</option>
-                        <option value="JPY">🇯🇵 Japanese Yen (¥)</option>
-                        <option value="CNY">🇨🇳 Chinese Yuan (¥)</option>
-                        <option value="AUD">🇦🇺 Australian Dollar (A$)</option>
-                        <option value="CAD">🇨🇦 Canadian Dollar (C$)</option>
-                        <option value="CHF">🇨🇭 Swiss Franc (CHF)</option>
-                        <option value="SGD">🇸🇬 Singapore Dollar (S$)</option>
-                        <option value="AED">🇦🇪 UAE Dirham (د.إ)</option>
-                        <option value="SAR">🇸🇦 Saudi Riyal (﷼)</option>
-                        <option value="ZAR">🇿🇦 South African Rand (R)</option>
-                        <option value="BRL">🇧🇷 Brazilian Real (R$)</option>
-                        <option value="MXN">🇲🇽 Mexican Peso (MX$)</option>
-                        <option value="KRW">🇰🇷 South Korean Won (₩)</option>
-                        <option value="RUB">🇷🇺 Russian Ruble (₽)</option>
-                        <option value="TRY">🇹🇷 Turkish Lira (₺)</option>
-                    </select>
+            <!-- Currency Section -->
+            <div class="settings-section">
+                <div class="settings-section-header">
+                    <div class="settings-section-icon">💱</div>
+                    <div>
+                        <div class="settings-section-title">Currency</div>
+                        <div class="settings-section-subtitle">Choose how amounts are displayed</div>
+                    </div>
                 </div>
-                <div id="currencyPreview" style="padding: 15px; border-radius: 8px; margin-top: 15px; border: 2px solid #D4603A; background: white;">
-                    <div style="font-size: 12px; color: #6c757d; margin-bottom: 5px;">Preview:</div>
-                    <div style="font-size: 24px; font-weight: bold; color: #D4603A;" id="currencyPreviewAmount">₹1,234.56</div>
+                <select id="currencySelect" onchange="updateCurrency()" style="display:none;">
+                    <option value="INR">🇮🇳 Indian Rupee (₹)</option>
+                    <option value="USD">🇺🇸 US Dollar ($)</option>
+                    <option value="EUR">🇪🇺 Euro (€)</option>
+                    <option value="GBP">🇬🇧 British Pound (£)</option>
+                    <option value="JPY">🇯🇵 Japanese Yen (¥)</option>
+                    <option value="CNY">🇨🇳 Chinese Yuan (¥)</option>
+                    <option value="AUD">🇦🇺 Australian Dollar (A$)</option>
+                    <option value="CAD">🇨🇦 Canadian Dollar (C$)</option>
+                    <option value="CHF">🇨🇭 Swiss Franc (CHF)</option>
+                    <option value="SGD">🇸🇬 Singapore Dollar (S$)</option>
+                    <option value="AED">🇦🇪 UAE Dirham (د.إ)</option>
+                    <option value="SAR">🇸🇦 Saudi Riyal (﷼)</option>
+                    <option value="ZAR">🇿🇦 South African Rand (R)</option>
+                    <option value="BRL">🇧🇷 Brazilian Real (R$)</option>
+                    <option value="MXN">🇲🇽 Mexican Peso (MX$)</option>
+                    <option value="KRW">🇰🇷 South Korean Won (₩)</option>
+                    <option value="RUB">🇷🇺 Russian Ruble (₽)</option>
+                    <option value="TRY">🇹🇷 Turkish Lira (₺)</option>
+                </select>
+                <div style="position:relative;margin-bottom:12px;">
+                    <input type="text" id="currencySearch" placeholder="Search currency..." autocomplete="off"
+                        style="width:100%;padding:12px 16px 12px 40px;border:2px solid var(--border-color,#eee);border-radius:12px;font-size:15px;background:var(--input-bg,#fff);color:var(--text-primary,#333);transition:border-color 0.2s;box-sizing:border-box;"
+                        onfocus="showCurrencyList()" oninput="filterCurrencies()">
+                    <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;color:#999;pointer-events:none;">🔍</span>
+                </div>
+                <div id="currencyListContainer" style="display:none;max-height:240px;overflow-y:auto;border-radius:12px;border:1.5px solid var(--border-color,#eee);margin-bottom:12px;scrollbar-width:thin;">
+                </div>
+                <div id="currencyPreview" class="settings-preview-card">
+                    <div style="display:flex;align-items:center;justify-content:center;gap:10px;">
+                        <span id="currencyPreviewFlag" style="font-size:36px;"></span>
+                        <div>
+                            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-secondary,#999);margin-bottom:2px;">Preview</div>
+                            <div style="font-size:28px;font-weight:800;color:#D4603A;" id="currencyPreviewAmount">₹1,234.56</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <h3 class="section-heading" style="margin: 0 0 15px 0; color: #495057; font-size: 16px; font-weight: 600;">➕ Add a New Category</h3>
-            <form onsubmit="addCategory(event)">
-                <div class="form-group">
-                    <label>Category Name</label>
-                    <input type="text" id="newCategoryName" required placeholder="e.g., Travel, Education">
+            <!-- Categories Section -->
+            <div class="settings-section">
+                <div class="settings-section-header">
+                    <div class="settings-section-icon">🏷️</div>
+                    <div>
+                        <div class="settings-section-title">Add A New Category</div>
+                        <div class="settings-section-subtitle">Organize your expenses</div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label onclick="toggleEmojiPicker()" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
-                        <span>Pick an Emoji</span>
-                        <span style="display:flex;align-items:center;gap:6px;">
-                            <span id="selectedEmojiPreview" style="font-size:20px;">📌</span>
-                            <span id="emojiPickerArrow" style="font-size:12px;transition:transform 0.25s;">▼</span>
-                        </span>
-                    </label>
-                    <input type="hidden" id="newCategoryEmoji" value="">
+
+                <form onsubmit="addCategory(event)" style="margin-bottom:16px;">
+                    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+                        <input type="text" id="newCategoryName" required placeholder="Category name" style="flex:1;padding:12px 16px;border:2px solid var(--border-color,#dee2e6);border-radius:12px;font-size:15px;background:var(--input-bg,#fff);color:var(--text-primary,#333);min-width:0;box-sizing:border-box;">
+                        <div onclick="toggleEmojiPicker()" style="cursor:pointer;width:48px;height:48px;display:flex;align-items:center;justify-content:center;border-radius:12px;border:2px solid var(--border-color,#dee2e6);background:var(--card-bg,#fff);font-size:22px;flex-shrink:0;transition:border-color 0.2s;" title="Pick emoji">
+                            <span id="selectedEmojiPreview">📌</span>
+                        </div>
+                        <input type="hidden" id="newCategoryEmoji" value="">
+                        <button type="submit" class="btn btn-primary" style="margin:0;height:48px;width:48px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:12px;font-size:20px;flex-shrink:0;">+</button>
+                    </div>
                     <div id="emojiPickerCollapsible" style="max-height:0;overflow:hidden;transition:max-height 0.3s ease;">
-                        <div id="emojiPickerGrid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:8px;padding:2px;"></div>
+                        <div id="emojiPickerGrid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;padding:2px;"></div>
                         <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
                             <button type="button" onclick="clearEmojiSelection()" style="font-size:11px;color:#D4603A;background:none;border:none;cursor:pointer;text-decoration:underline;">Reset</button>
                         </div>
                     </div>
-                </div>
-                <button type="submit" class="btn btn-primary">Add Category</button>
-            </form>
+                    <span id="emojiPickerArrow" style="display:none;">▼</span>
+                </form>
 
-            <div class="categories-toggle" onclick="toggleCategoriesSection()">
-                <span class="categories-toggle-left">Your Categories <span class="categories-toggle-count" id="categoryCount"></span></span>
-                <span class="categories-toggle-arrow" id="categoriesArrow">▼</span>
-            </div>
-            <div class="categories-section" id="categoriesSection">
-                <div class="category-grid" id="categoryList"></div>
+                <div class="categories-toggle" onclick="toggleCategoriesSection()">
+                    <span class="categories-toggle-left">Your Categories <span class="categories-toggle-count" id="categoryCount"></span></span>
+                    <span class="categories-toggle-arrow" id="categoriesArrow">▼</span>
+                </div>
+                <div class="categories-section" id="categoriesSection">
+                    <div class="category-grid" id="categoryList"></div>
+                </div>
             </div>
         </div>
 
@@ -2798,11 +2880,89 @@
             }
         }
 
+        const currencyData = [
+            { code: 'INR', flag: '🇮🇳', name: 'Indian Rupee', symbol: '₹' },
+            { code: 'USD', flag: '🇺🇸', name: 'US Dollar', symbol: '$' },
+            { code: 'EUR', flag: '🇪🇺', name: 'Euro', symbol: '€' },
+            { code: 'GBP', flag: '🇬🇧', name: 'British Pound', symbol: '£' },
+            { code: 'JPY', flag: '🇯🇵', name: 'Japanese Yen', symbol: '¥' },
+            { code: 'CNY', flag: '🇨🇳', name: 'Chinese Yuan', symbol: '¥' },
+            { code: 'AUD', flag: '🇦🇺', name: 'Australian Dollar', symbol: 'A$' },
+            { code: 'CAD', flag: '🇨🇦', name: 'Canadian Dollar', symbol: 'C$' },
+            { code: 'CHF', flag: '🇨🇭', name: 'Swiss Franc', symbol: 'CHF' },
+            { code: 'SGD', flag: '🇸🇬', name: 'Singapore Dollar', symbol: 'S$' },
+            { code: 'AED', flag: '🇦🇪', name: 'UAE Dirham', symbol: 'د.إ' },
+            { code: 'SAR', flag: '🇸🇦', name: 'Saudi Riyal', symbol: '﷼' },
+            { code: 'ZAR', flag: '🇿🇦', name: 'South African Rand', symbol: 'R' },
+            { code: 'BRL', flag: '🇧🇷', name: 'Brazilian Real', symbol: 'R$' },
+            { code: 'MXN', flag: '🇲🇽', name: 'Mexican Peso', symbol: 'MX$' },
+            { code: 'KRW', flag: '🇰🇷', name: 'South Korean Won', symbol: '₩' },
+            { code: 'RUB', flag: '🇷🇺', name: 'Russian Ruble', symbol: '₽' },
+            { code: 'TRY', flag: '🇹🇷', name: 'Turkish Lira', symbol: '₺' },
+        ];
+
+        function showCurrencyList() {
+            const container = document.getElementById('currencyListContainer');
+            container.style.display = 'block';
+            filterCurrencies();
+        }
+
+        function hideCurrencyList() {
+            setTimeout(() => { document.getElementById('currencyListContainer').style.display = 'none'; }, 200);
+        }
+
+        function filterCurrencies() {
+            const query = document.getElementById('currencySearch').value.toLowerCase();
+            const container = document.getElementById('currencyListContainer');
+            const _d = dk();
+            const filtered = currencyData.filter(c =>
+                c.code.toLowerCase().includes(query) ||
+                c.name.toLowerCase().includes(query) ||
+                c.symbol.includes(query)
+            );
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div style="padding:20px;text-align:center;color:${_d ? '#887755' : '#999'};font-size:13px;">No currencies found</div>`;
+                return;
+            }
+
+            let html = '';
+            filtered.forEach(c => {
+                const isActive = currentCurrency === c.code;
+                const bg = isActive ? (_d ? 'rgba(212,96,58,0.15)' : 'rgba(212,96,58,0.08)') : 'transparent';
+                const weight = isActive ? '700' : '500';
+                const check = isActive ? '<span style="color:#D4603A;font-weight:700;">✓</span>' : '';
+                html += `<div onclick="selectCurrency('${c.code}')" style="display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;background:${bg};transition:background 0.15s;border-bottom:1px solid ${_d ? '#2A1A10' : '#f5f5f5'};" onmouseover="this.style.background='${_d ? 'rgba(212,96,58,0.1)' : '#f9f9f9'}'" onmouseout="this.style.background='${bg}'">
+                    <span style="font-size:24px;">${c.flag}</span>
+                    <div style="flex:1;">
+                        <div style="font-size:14px;font-weight:${weight};color:${_d ? '#F5E8D8' : '#333'};">${c.name}</div>
+                        <div style="font-size:11px;color:${_d ? '#887755' : '#999'};">${c.code} · ${c.symbol}</div>
+                    </div>
+                    ${check}
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function selectCurrency(code) {
+            document.getElementById('currencySelect').value = code;
+            document.getElementById('currencySearch').value = '';
+            document.getElementById('currencyListContainer').style.display = 'none';
+            updateCurrency();
+        }
+
+        function updateCurrencyPreviewFlag() {
+            const c = currencyData.find(c => c.code === currentCurrency);
+            const flagEl = document.getElementById('currencyPreviewFlag');
+            if (flagEl && c) flagEl.textContent = c.flag;
+        }
+
         function updateCurrency() {
             currentCurrency = document.getElementById('currencySelect').value;
             localStorage.setItem('currency', currentCurrency);
             saveData();
             document.getElementById('currencyPreviewAmount').textContent = formatCurrency(1234.56);
+            updateCurrencyPreviewFlag();
             renderExpenses(); renderBudgets(); renderMonthlyAnalytics(); renderYearlyAnalytics(); renderMiniDashboard();
         }
 
@@ -3601,7 +3761,14 @@
             document.getElementById('yearDisplay').textContent = analyticsYear;
             renderExpenses(); renderBudgets(); renderMonthlyAnalytics(); renderCategories();
             updateCategoryDropdowns(); renderQuickCategories(); updateFilterCategoryDropdown();
-            updateScrollButtons(); renderMiniDashboard(); initVoiceInput();
+            updateScrollButtons(); renderMiniDashboard(); initVoiceInput(); updateCurrencyPreviewFlag();
+            document.addEventListener('click', function(e) {
+                const search = document.getElementById('currencySearch');
+                const list = document.getElementById('currencyListContainer');
+                if (list && search && !search.contains(e.target) && !list.contains(e.target)) {
+                    list.style.display = 'none';
+                }
+            });
             // Show currency modal on first visit
             if (!localStorage.getItem('currencyChosen')) { setTimeout(showCurrencyModal, 500); }
             renderAllTips();
@@ -4032,55 +4199,287 @@
             </div>`; return; }
             bd.innerHTML = '';
             populateCategoryDropdown(); renderCategoryYearlyTrend();
+            renderCategorySparklines();
         }
 
+        let selectedYearlyCategory = '';
+
         function populateCategoryDropdown() {
-            document.getElementById('yearlyCategory').innerHTML = '<option value="">All Categories</option>' + categories.map(c => `<option value="${c.name}">${c.emoji} ${c.name}</option>`).join('');
+            renderCategorySparklines();
+            renderCategoryPills();
+        }
+
+        function getCategoryYearlyData(catName) {
+            const md = []; let total = 0;
+            for (let m = 1; m <= 12; m++) {
+                const mk = `${analyticsYear}-${String(m).padStart(2, '0')}`;
+                const ce = (expenses[mk] || []).filter(e => e.category === catName);
+                const t = ce.reduce((s, e) => s + e.amount, 0);
+                md.push({ month: m, total: t, count: ce.length }); total += t;
+            }
+            return { md, total };
+        }
+
+        function renderCategorySparklines() {
+            const container = document.getElementById('categorySparklines');
+            if (!container) return;
+            const _d = dk();
+            const catData = categories.map(c => {
+                const { md, total } = getCategoryYearlyData(c.name);
+                return { ...c, md, total };
+            }).filter(c => c.total > 0).sort((a, b) => b.total - a.total);
+
+            if (catData.length === 0) { container.innerHTML = ''; return; }
+
+            const isMobile = window.innerWidth < 768;
+
+            if (isMobile) {
+                // Mobile: horizontal scrolling pills with mini sparklines
+                let html = `<div style="display:flex;gap:8px;overflow-x:auto;padding:4px 0 8px;-webkit-overflow-scrolling:touch;scrollbar-width:none;" class="hide-scrollbar">`;
+                catData.forEach(cat => {
+                    const isSelected = selectedYearlyCategory === cat.name;
+                    const bg = isSelected ? '#D4603A' : (_d ? '#1e1e2e' : '#fff');
+                    const textColor = isSelected ? '#fff' : (_d ? '#F5E8D8' : '#333');
+                    const amtColor = isSelected ? 'rgba(255,255,255,0.8)' : '#D4603A';
+                    const border = isSelected ? '#D4603A' : (_d ? '#2A1A10' : '#eee');
+                    const sparkColor = isSelected ? 'rgba(255,255,255,0.6)' : '#D4603A';
+
+                    // Mini sparkline
+                    const maxVal = Math.max(...cat.md.map(d => d.total), 1);
+                    const sparkPts = cat.md.map((d, i) => {
+                        const x = (i / 11) * 44;
+                        const y = 16 - (d.total / maxVal) * 13;
+                        return `${x},${y}`;
+                    }).join(' ');
+
+                    html += `<div onclick="selectYearlyCategory('${cat.name}')" style="cursor:pointer;flex-shrink:0;display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:16px;border:1.5px solid ${border};background:${bg};transition:all 0.2s;">
+                        <span style="font-size:18px;">${cat.emoji}</span>
+                        <div style="display:flex;flex-direction:column;gap:2px;">
+                            <span style="font-size:12px;font-weight:600;color:${textColor};white-space:nowrap;">${cat.name}</span>
+                            <div style="display:flex;align-items:center;gap:6px;">
+                                <span style="font-size:11px;font-weight:700;color:${amtColor};white-space:nowrap;">${formatCurrency(cat.total)}</span>
+                                <svg width="44" height="18" viewBox="0 0 44 18" style="flex-shrink:0;">
+                                    <polyline points="${sparkPts}" fill="none" stroke="${sparkColor}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+                html += `</div>`;
+                container.innerHTML = html;
+
+                // Show/hide fade hint
+                const fadeHint = document.getElementById('pillFadeHint');
+                if (fadeHint) {
+                    fadeHint.style.display = catData.length > 3 ? 'block' : 'none';
+                    if (_d) fadeHint.style.background = 'linear-gradient(to right, transparent, #0d0d14)';
+                }
+            } else {
+                // Desktop: sparkline grid
+                let html = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;">`;
+                catData.forEach(cat => {
+                    const maxVal = Math.max(...cat.md.map(d => d.total), 1);
+                    const points = cat.md.map((d, i) => {
+                        const x = (i / 11) * 120;
+                        const y = 32 - (d.total / maxVal) * 28;
+                        return `${x},${y}`;
+                    }).join(' ');
+                    const fillPoints = `0,32 ${points} 120,32`;
+                    const isSelected = selectedYearlyCategory === cat.name;
+                    const borderColor = isSelected ? '#D4603A' : (_d ? '#2A1A10' : '#eee');
+                    const bgColor = isSelected ? (_d ? 'rgba(212,96,58,0.15)' : 'rgba(212,96,58,0.06)') : (_d ? '#161620' : '#fff');
+
+                    html += `<div onclick="selectYearlyCategory('${cat.name}')" style="cursor:pointer;padding:12px;border-radius:12px;border:1.5px solid ${borderColor};background:${bgColor};transition:all 0.2s;">
+                        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                            <span style="font-size:16px;">${cat.emoji}</span>
+                            <span style="font-size:12px;font-weight:600;color:${_d ? '#F5E8D8' : '#333'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${cat.name}</span>
+                        </div>
+                        <svg width="120" height="36" viewBox="0 0 120 36" style="width:100%;height:36px;">
+                            <polyline points="${fillPoints}" fill="url(#sparkGrad_${cat.name.replace(/\s/g,'_')})" />
+                            <polyline points="${points}" fill="none" stroke="#D4603A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <defs><linearGradient id="sparkGrad_${cat.name.replace(/\s/g,'_')}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#D4603A" stop-opacity="0.25"/><stop offset="100%" stop-color="#D4603A" stop-opacity="0.02"/></linearGradient></defs>
+                        </svg>
+                        <div style="font-size:13px;font-weight:700;color:#D4603A;margin-top:4px;">${formatCurrency(cat.total)}</div>
+                    </div>`;
+                });
+                html += `</div>`;
+                container.innerHTML = html;
+            }
+        }
+
+        function renderCategoryPills() {
+            const container = document.getElementById('categoryPills');
+            if (!container) return;
+            container.innerHTML = '';
+        }
+
+        function selectYearlyCategory(name) {
+            selectedYearlyCategory = selectedYearlyCategory === name ? '' : name;
+            renderCategorySparklines();
+            renderCategoryYearlyTrend();
+            if (selectedYearlyCategory) {
+                const el = document.getElementById('categoryYearlyChart');
+                if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+            }
         }
 
         function renderCategoryYearlyTrend() {
-            const sel = document.getElementById('yearlyCategory').value;
+            const sel = selectedYearlyCategory;
             const div = document.getElementById('categoryYearlyChart');
             if (!sel) { div.innerHTML = ''; return; }
+
             const mn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-            const md = []; let cyt = 0;
+            const { md, total: cyt } = getCategoryYearlyData(sel);
+            const catObj = categories.find(c => c.name === sel);
+            const emoji = catObj ? catObj.emoji : '📊';
+
+            if (cyt === 0) { div.innerHTML = `<div style="text-align:center;padding:40px;color:${dk() ? '#887755' : '#6c757d'};"><div style="font-size:40px;margin-bottom:10px;">📊</div><div>No ${sel} expenses in ${analyticsYear}</div></div>`; return; }
+
+            const _d = dk();
+            const maxA = Math.max(...md.map(d => d.total), 1);
+            const sym = currencySymbols[currentCurrency] || '₹';
+            const am = md.filter(d => d.total > 0).length;
+            const avg = am > 0 ? cyt / am : 0;
+            const tt = md.reduce((s, d) => s + d.count, 0);
+            const peakMonth = md.reduce((a, b) => b.total > a.total ? b : a);
+            const peakName = mn[peakMonth.month - 1];
+
+            // Calculate total yearly spend for percentage
+            let yearTotal = 0;
             for (let m = 1; m <= 12; m++) {
                 const mk = `${analyticsYear}-${String(m).padStart(2, '0')}`;
-                const ce = (expenses[mk] || []).filter(e => e.category === sel);
-                const t = ce.reduce((s, e) => s + e.amount, 0);
-                md.push({ month: m, total: t, count: ce.length }); cyt += t;
+                yearTotal += (expenses[mk] || []).reduce((s, e) => s + e.amount, 0);
             }
-            if (cyt === 0) { div.innerHTML = `<div style="text-align:center;padding:40px;color:${dk() ? '#887755' : '#6c757d'};"><div style="font-size:40px;margin-bottom:10px;">📊</div><div>No ${sel} expenses in ${analyticsYear}</div></div>`; return; }
-            const canvas = document.createElement('canvas'); canvas.width = 600; canvas.height = 300;
-            const ctx = canvas.getContext('2d');
-            const p = 50, cw = canvas.width - p * 2, ch = canvas.height - p * 2;
-            const maxA = Math.max(...md.map(d => d.total));
-            const sym = currencySymbols[currentCurrency] || '₹';
-            ctx.strokeStyle = dk() ? '#2A1A10' : '#dee2e6'; ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(p, p); ctx.lineTo(p, canvas.height - p); ctx.lineTo(canvas.width - p, canvas.height - p); ctx.stroke();
-            ctx.strokeStyle = '#D4603A'; ctx.lineWidth = 3; ctx.beginPath();
-            md.forEach((d, i) => { const x = p + i * (cw / 12) + (cw / 24), y = canvas.height - p - (d.total / maxA) * ch; i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
-            ctx.stroke();
+            const pct = yearTotal > 0 ? ((cyt / yearTotal) * 100).toFixed(1) : 0;
+
+            // Build SVG chart with gradient fill and smooth line
+            const svgW = 600, svgH = 260, padL = 50, padR = 20, padT = 30, padB = 40;
+            const chartW = svgW - padL - padR, chartH = svgH - padT - padB;
+
+            let linePts = '', areaPts = '';
+            const dataPoints = [];
             md.forEach((d, i) => {
-                const x = p + i * (cw / 12) + (cw / 24), y = canvas.height - p - (d.total / maxA) * ch;
-                ctx.fillStyle = '#D4603A'; ctx.beginPath(); ctx.arc(x, y, 6, 0, 2 * Math.PI); ctx.fill();
-                ctx.fillStyle = dk() ? '#161620' : 'white'; ctx.beginPath(); ctx.arc(x, y, 3, 0, 2 * Math.PI); ctx.fill();
-                ctx.fillStyle = dk() ? '#E0BB8A' : '#495057'; ctx.font = '11px -apple-system'; ctx.textAlign = 'center'; ctx.fillText(mn[i], x, canvas.height - p + 20);
-                if (d.total > 0) { ctx.fillStyle = '#D4603A'; ctx.font = 'bold 10px -apple-system'; ctx.fillText(abbreviateAmount(d.total, sym), x, y - 10); }
+                const x = padL + (i / 11) * chartW;
+                const y = padT + chartH - (d.total / maxA) * chartH;
+                dataPoints.push({ x, y, d });
+                linePts += `${x},${y} `;
             });
-            ctx.fillStyle = dk() ? '#887755' : '#6c757d'; ctx.font = '10px -apple-system'; ctx.textAlign = 'right';
-            for (let i = 0; i <= 5; i++) { const v = Math.round((maxA / 5) * i), y = canvas.height - p - (ch / 5) * i; ctx.fillText(abbreviateAmount(v, sym), p - 10, y + 4); }
-            const avg = cyt / 12, am = md.filter(d => d.total > 0).length, tt = md.reduce((s, d) => s + d.count, 0);
-            const _d = dk();
-            div.innerHTML = `<div style="background:${_d ? '#161620' : '#FDF6F2'};padding:20px;border-radius:10px;margin-bottom:15px;">
-                <div style="font-weight:600;font-size:16px;color:${_d ? '#F5E8D8' : '#495057'};margin-bottom:15px;">${sel} Spending in ${analyticsYear}</div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
-                    <div><div style="font-size:11px;color:${_d ? '#887755' : '#6c757d'};">Total Spent</div><div style="font-size:20px;font-weight:bold;color:#D4603A;">${formatCurrency(cyt)}</div></div>
-                    <div><div style="font-size:11px;color:${_d ? '#887755' : '#6c757d'};">Avg per Month</div><div style="font-size:20px;font-weight:bold;color:#D4603A;">${formatCurrency(avg)}</div></div>
-                    <div><div style="font-size:11px;color:${_d ? '#887755' : '#6c757d'};">Active Months</div><div style="font-size:20px;font-weight:bold;color:#D4603A;">${am}/12</div></div>
-                    <div><div style="font-size:11px;color:${_d ? '#887755' : '#6c757d'};">Transactions</div><div style="font-size:20px;font-weight:bold;color:#D4603A;">${tt}</div></div>
-                </div></div>`;
-            div.appendChild(canvas);
+            areaPts = `${padL},${padT + chartH} ${linePts} ${padL + chartW},${padT + chartH}`;
+
+            // Grid lines
+            let gridLines = '';
+            for (let i = 0; i <= 4; i++) {
+                const y = padT + (chartH / 4) * i;
+                const val = Math.round(maxA - (maxA / 4) * i);
+                gridLines += `<line x1="${padL}" y1="${y}" x2="${svgW - padR}" y2="${y}" stroke="${_d ? '#2A1A10' : '#f0f0f0'}" stroke-width="1"/>`;
+                gridLines += `<text x="${padL - 8}" y="${y + 4}" text-anchor="end" font-size="10" fill="${_d ? '#887755' : '#999'}">${abbreviateAmount(val, sym)}</text>`;
+            }
+
+            // Month labels and data points
+            let labels = '', dots = '', valueLabels = '';
+            dataPoints.forEach((p, i) => {
+                labels += `<text x="${p.x}" y="${svgH - 8}" text-anchor="middle" font-size="11" font-weight="500" fill="${_d ? '#887755' : '#888'}">${mn[i]}</text>`;
+                if (p.d.total > 0) {
+                    const isPeak = p.d.month === peakMonth.month;
+                    const dotR = isPeak ? 6 : 4;
+                    dots += `<circle cx="${p.x}" cy="${p.y}" r="${dotR}" fill="#D4603A" stroke="${_d ? '#161620' : '#fff'}" stroke-width="2"/>`;
+                    valueLabels += `<text x="${p.x}" y="${p.y - 12}" text-anchor="middle" font-size="${isPeak ? '11' : '9'}" font-weight="${isPeak ? '700' : '500'}" fill="#D4603A">${abbreviateAmount(p.d.total, sym)}</text>`;
+                }
+            });
+
+            const svg = `<svg viewBox="0 0 ${svgW} ${svgH}" style="width:100%;height:auto;max-height:280px;">
+                <defs>
+                    <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#D4603A" stop-opacity="0.3"/>
+                        <stop offset="100%" stop-color="#D4603A" stop-opacity="0.02"/>
+                    </linearGradient>
+                </defs>
+                ${gridLines}
+                <polygon points="${areaPts}" fill="url(#areaGrad)"/>
+                <polyline points="${linePts}" fill="none" stroke="#D4603A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                ${dots}
+                ${valueLabels}
+                ${labels}
+            </svg>`;
+
+            div.innerHTML = `
+                <div style="background:${_d ? '#161620' : '#FDF6F2'};padding:20px;border-radius:14px;margin-bottom:16px;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+                        <span style="font-size:24px;">${emoji}</span>
+                        <div>
+                            <div style="font-weight:700;font-size:17px;color:${_d ? '#F5E8D8' : '#333'};">${sel}</div>
+                            <div style="font-size:12px;color:${_d ? '#887755' : '#999'};">${pct}% of yearly spend</div>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                        <div style="text-align:center;padding:10px;border-radius:10px;background:${_d ? '#1e1e2e' : '#fff'};border:1px solid ${_d ? '#2A1A10' : '#f0f0f0'};">
+                            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:${_d ? '#887755' : '#999'};margin-bottom:4px;">Total</div>
+                            <div style="font-size:18px;font-weight:700;color:#D4603A;">${formatCurrency(cyt)}</div>
+                        </div>
+                        <div style="text-align:center;padding:10px;border-radius:10px;background:${_d ? '#1e1e2e' : '#fff'};border:1px solid ${_d ? '#2A1A10' : '#f0f0f0'};">
+                            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:${_d ? '#887755' : '#999'};margin-bottom:4px;">Avg/Month</div>
+                            <div style="font-size:18px;font-weight:700;color:#D4603A;">${formatCurrency(avg)}</div>
+                        </div>
+                        <div style="grid-column:1/-1;text-align:center;padding:10px;border-radius:10px;background:${_d ? '#1e1e2e' : '#fff'};border:1px solid ${_d ? '#2A1A10' : '#f0f0f0'};display:flex;align-items:center;justify-content:center;gap:8px;">
+                            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:${_d ? '#887755' : '#999'};">Peak</div>
+                            <div style="font-size:14px;font-weight:700;color:#D4603A;">${peakName}</div>
+                            <div style="font-size:12px;font-weight:600;color:${_d ? '#887755' : '#999'};">${formatCurrency(peakMonth.total)}</div>
+                        </div>
+                    </div>
+                    <div style="margin-top:12px;display:flex;justify-content:center;gap:16px;">
+                        <div style="font-size:11px;color:${_d ? '#887755' : '#999'};"><span style="font-weight:600;color:${_d ? '#E0BB8A' : '#555'};">${am}</span> active months</div>
+                        <div style="font-size:11px;color:${_d ? '#887755' : '#999'};"><span style="font-weight:600;color:${_d ? '#E0BB8A' : '#555'};">${tt}</span> transactions</div>
+                    </div>
+                </div>
+                ${svg}
+                ${buildMoMChanges(md, mn, _d)}`;
+        }
+
+        function buildMoMChanges(md, mn, _d) {
+            // Only show months that have data or follow a month with data
+            const changes = [];
+            for (let i = 0; i < 12; i++) {
+                if (md[i].total === 0 && (i === 0 || md[i-1].total === 0)) continue;
+                if (i === 0) {
+                    if (md[i].total > 0) changes.push({ month: mn[i], total: md[i].total, change: null });
+                } else if (md[i].total > 0 || md[i-1].total > 0) {
+                    const prev = md[i-1].total;
+                    const curr = md[i].total;
+                    let change = null;
+                    if (prev > 0 && curr > 0) {
+                        change = Math.round(((curr - prev) / prev) * 100);
+                    } else if (prev === 0 && curr > 0) {
+                        change = 'new';
+                    } else if (curr === 0) {
+                        change = -100;
+                    }
+                    changes.push({ month: mn[i], total: md[i].total, change });
+                }
+            }
+            if (changes.length < 2) return '';
+
+            let html = `<div style="display:flex;gap:6px;overflow-x:auto;padding:8px 0;margin-top:12px;-webkit-overflow-scrolling:touch;scrollbar-width:none;" class="hide-scrollbar">`;
+            changes.forEach(c => {
+                let arrow = '', color = '';
+                if (c.change === null) {
+                    arrow = '●'; color = _d ? '#887755' : '#999';
+                } else if (c.change === 'new') {
+                    arrow = '🆕'; color = '#D4603A';
+                } else if (c.change > 0) {
+                    arrow = `↑${c.change}%`; color = '#dc3545';
+                } else if (c.change < 0) {
+                    arrow = `↓${Math.abs(c.change)}%`; color = '#28a745';
+                } else {
+                    arrow = '→0%'; color = _d ? '#887755' : '#999';
+                }
+                html += `<div style="flex-shrink:0;text-align:center;padding:8px 12px;border-radius:10px;background:${_d ? '#1e1e2e' : '#f8f9fa'};border:1px solid ${_d ? '#2A1A10' : '#eee'};min-width:60px;">
+                    <div style="font-size:10px;font-weight:600;color:${_d ? '#887755' : '#999'};margin-bottom:3px;">${c.month}</div>
+                    <div style="font-size:12px;font-weight:700;color:${_d ? '#F5E8D8' : '#333'};">${formatCurrency(c.total)}</div>
+                    <div style="font-size:10px;font-weight:700;color:${color};margin-top:2px;">${arrow}</div>
+                </div>`;
+            });
+            html += `</div>`;
+            return html;
         }
 
         const emojiOptions = [
@@ -4283,6 +4682,15 @@
             renderExpenses();
         }
 
+        function handleExpenseClick(mk, id, event) {
+            // On desktop (mouse), clicking an expense enters select mode
+            const isDesktop = window.matchMedia('(pointer: fine)').matches;
+            if (!isDesktop) return; // On touch devices, swipe/long-press/tap-actions handle it
+            // Don't trigger if clicking edit/delete buttons
+            if (event.target.closest('.expense-hover-actions') || event.target.closest('.expense-hover-btn')) return;
+            enterSelectMode(mk + ':' + id);
+        }
+
         function toggleExpenseSelect(mk, id, el) {
             const key = mk + ':' + id;
             if (selectedExpenses.has(key)) { selectedExpenses.delete(key); } else { selectedExpenses.add(key); }
@@ -4460,7 +4868,7 @@
                     const isChecked = selectedExpenses.has(eKey);
                     html += `<div class="expense-item-wrapper">
                         ${selectMode ? '' : `<div class="expense-delete-bg" onclick="deleteExpense('${mk}',${e.id})">🗑️</div>`}
-                        <div class="expense-item${isChecked ? ' selected-highlight' : ''}" data-expense-id="${e.id}" data-mk="${mk}" ${selectMode ? `onclick="toggleExpenseSelect('${mk}',${e.id},this.querySelector('.expense-checkbox'))"` : ''}>
+                        <div class="expense-item${isChecked ? ' selected-highlight' : ''}" data-expense-id="${e.id}" data-mk="${mk}" ${selectMode ? `onclick="toggleExpenseSelect('${mk}',${e.id},this.querySelector('.expense-checkbox'))"` : `onclick="handleExpenseClick('${mk}',${e.id},event)"`}>
                             ${selectMode ? `<div class="expense-checkbox${isChecked ? ' checked' : ''}" data-key="${eKey}"></div>` : ''}
                             <div class="expense-info">
                                 <div class="expense-category">${e.category}</div>

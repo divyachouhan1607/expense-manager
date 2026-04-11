@@ -1,52 +1,19 @@
-import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import { db } from "@/lib/db";
+import { createClient } from "@/lib/supabase/server";
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(db),
-  providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      checks: ["none"],
-      authorization: {
-        params: {
-          access_type: "offline",
-          prompt: "consent",
-        },
-      },
-    }),
-  ],
-  pages: {
-    signIn: "/login",
-  },
-  session: {
-    strategy: "jwt",
-  },
-  callbacks: {
-    authorized({ auth, request: { nextUrl } }) {
-      const isLoggedIn = !!auth?.user;
-      const isOnDashboard = nextUrl.pathname.startsWith("/dashboard");
-      const isOnLogin = nextUrl.pathname === "/login";
+export async function auth() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-      if (isOnDashboard && !isLoggedIn) {
-        return Response.redirect(new URL("/login", nextUrl));
-      }
-      if (isOnLogin && isLoggedIn) {
-        return Response.redirect(new URL("/dashboard", nextUrl));
-      }
-      return true;
+  if (!user) return null;
+
+  return {
+    user: {
+      id: user.id,
+      email: user.email ?? null,
+      name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
+      image: user.user_metadata?.avatar_url ?? null,
     },
-    jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-      }
-      return token;
-    },
-    session({ session, token }) {
-      session.user.id = token.id as string;
-      return session;
-    },
-  },
-});
+  };
+}
