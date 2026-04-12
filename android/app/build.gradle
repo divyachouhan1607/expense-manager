@@ -1,5 +1,11 @@
 apply plugin: 'com.android.application'
 
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace = "in.kharchasaathi.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -22,10 +28,10 @@ android {
     }
     signingConfigs {
         release {
-            storeFile file('../kharcha-saathi-release.keystore')
-            storePassword '***REDACTED***'
-            keyAlias 'kharcha-saathi'
-            keyPassword '***REDACTED***'
+            storeFile file(keystoreProperties['storeFile'] ?: '../kharcha-saathi-release.keystore')
+            storePassword keystoreProperties['storePassword'] ?: ''
+            keyAlias keystoreProperties['keyAlias'] ?: ''
+            keyPassword keystoreProperties['keyPassword'] ?: ''
         }
     }
     buildTypes {
