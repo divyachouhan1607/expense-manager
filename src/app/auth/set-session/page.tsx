@@ -11,20 +11,38 @@ export default function SetSessionPage() {
 
     if (accessToken && refreshToken) {
       const supabase = createClient();
+
+      // Timeout fallback — if setSession takes too long, try direct navigation
+      const timeout = setTimeout(() => {
+        window.location.href = "/dashboard";
+      }, 3000);
+
       supabase.auth
         .setSession({
           access_token: accessToken,
           refresh_token: refreshToken,
         })
         .then(({ error }) => {
+          clearTimeout(timeout);
           if (!error) {
             window.location.href = "/dashboard";
           } else {
-            window.location.href = "/login?error=session";
+            // Session might be expired — try refreshing
+            return supabase.auth.refreshSession({
+              refresh_token: refreshToken,
+            });
           }
+        })
+        .then((result) => {
+          if (result && !result.error) {
+            window.location.href = "/dashboard";
+          }
+        })
+        .catch(() => {
+          window.location.href = "/dashboard";
         });
     } else {
-      window.location.href = "/login?error=missing_tokens";
+      window.location.href = "/login";
     }
   }, []);
 

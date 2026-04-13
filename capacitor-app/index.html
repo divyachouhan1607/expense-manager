@@ -155,44 +155,21 @@
     async function checkExistingSession() {
       const saved = localStorage.getItem('kharcha_session');
       if (saved) {
+        // User was signed in before — go straight to the app
+        // The remote app's set-session page will set cookies in the WebView
         try {
           const session = JSON.parse(saved);
-          // Verify the token is still valid
-          const res = await fetch(SUPABASE_URL + '/auth/v1/user', {
-            headers: {
-              'Authorization': 'Bearer ' + session.access_token,
-              'apikey': SUPABASE_KEY
-            }
-          });
-          if (res.ok) {
-            // Session valid — go to app
-            goToApp(session.access_token, session.refresh_token);
-            return;
-          }
-          // Try refresh
-          const refreshRes = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=refresh_token', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'apikey': SUPABASE_KEY
-            },
-            body: JSON.stringify({ refresh_token: session.refresh_token })
-          });
-          if (refreshRes.ok) {
-            const data = await refreshRes.json();
-            localStorage.setItem('kharcha_session', JSON.stringify({
-              access_token: data.access_token,
-              refresh_token: data.refresh_token
-            }));
-            goToApp(data.access_token, data.refresh_token);
-            return;
-          }
+          goToApp(session.access_token, session.refresh_token);
         } catch (e) {
-          // Session invalid, show login
+          localStorage.removeItem('kharcha_session');
+          showLogin();
         }
-        localStorage.removeItem('kharcha_session');
+        return;
       }
-      // No valid session — show login screen
+      showLogin();
+    }
+
+    function showLogin() {
       document.getElementById('loadingScreen').style.display = 'none';
       document.getElementById('loginScreen').style.display = 'block';
     }
