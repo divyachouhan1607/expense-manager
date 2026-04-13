@@ -7,6 +7,16 @@ const config: CapacitorConfig = {
   server: {
     url: 'https://kharcha-saathi.vercel.app',
     cleartext: false
+  },
+  plugins: {
+    SocialLogin: {
+      providers: {
+        google: true,
+        facebook: false,
+        apple: false,
+        twitter: false
+      }
+    }
   }
 };
 
