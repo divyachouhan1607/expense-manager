@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 function isCapacitor(): boolean {
@@ -23,43 +22,12 @@ export function GoogleSignInButton({
   children: React.ReactNode;
   className?: string;
 }) {
-  const deepLinkSetup = useRef(false);
-
-  useEffect(() => {
-    if (!isCapacitor() || deepLinkSetup.current) return;
-    deepLinkSetup.current = true;
-
-    // Set up deep link listener as fallback for Chrome Custom Tabs flow
-    import("@capacitor/app").then(({ App }) => {
-      App.addListener("appUrlOpen", async ({ url }) => {
-        if (!url.includes("auth/callback")) return;
-
-        const { Browser } = await import("@capacitor/browser");
-        await Browser.close();
-
-        const urlObj = new URL(url);
-        const accessToken = urlObj.searchParams.get("access_token");
-        const refreshToken = urlObj.searchParams.get("refresh_token");
-
-        if (accessToken && refreshToken) {
-          const supabase = createClient();
-          const { error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          });
-          if (!error) {
-            window.location.href = "/dashboard";
-          }
-        }
-      });
-    });
-  }, []);
-
   const handleSignIn = async () => {
     const supabase = createClient();
 
     if (isCapacitor()) {
-      // Try native Google Sign-In first (no browser opens)
+      // Native Google Sign-In — shows bottom sheet, no browser opens
+      // Cookies are set on the same origin since WebView loads the remote URL directly
       const plugin = getCapacitorPlugin("SocialLogin");
 
       if (plugin) {
@@ -88,41 +56,26 @@ export function GoogleSignInButton({
             });
 
             if (!error && data?.session) {
-              await new Promise((r) => setTimeout(r, 200));
               window.location.href = "/dashboard";
               return;
             }
           }
         } catch {
-          // Native sign-in failed, fall through to Chrome Custom Tabs
+          // Native sign-in failed, fall through to web OAuth
         }
       }
+    }
 
-      // Fallback: Chrome Custom Tabs with deep link callback
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback?from=app`,
-          skipBrowserRedirect: true,
-        },
-      });
+    // Web (or Capacitor fallback): standard OAuth redirect
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+      },
+    });
 
-      if (data?.url && !error) {
-        const { Browser } = await import("@capacitor/browser");
-        await Browser.open({ url: data.url });
-      }
-    } else {
-      // Web: standard OAuth redirect
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
-        },
-      });
-
-      if (data?.url && !error) {
-        window.location.href = data.url;
-      }
+    if (data?.url && !error) {
+      window.location.href = data.url;
     }
   };
 
