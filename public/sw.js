@@ -45,8 +45,11 @@ self.addEventListener("fetch", (event) => {
   // including failures — instead of serving zombie cached responses.
   if (request.url.includes("/api/")) return;
 
-  // Network-first for navigations (HTML pages)
-  if (request.mode === "navigate") {
+  // Network-first for any HTML file and every navigation. This guarantees
+  // that new deploys (including /expense-app.html loaded inside an iframe)
+  // take effect on the next page load instead of being pinned to the
+  // cached copy — the bug that previously required users to hard-refresh.
+  if (request.mode === "navigate" || /\.html(\?|$)/.test(request.url)) {
     event.respondWith(
       fetch(request)
         .then((response) => {
