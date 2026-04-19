@@ -2848,14 +2848,86 @@
 
         const defaultCategories = [
             { name: 'Bills', emoji: '📄', isDefault: true },
+            { name: 'Dining Out', emoji: '🍽️', isDefault: true },
             { name: 'Entertainment', emoji: '🎬', isDefault: true },
-            { name: 'Food', emoji: '🍔', isDefault: true },
             { name: 'Groceries', emoji: '🧺', isDefault: true },
             { name: 'Health', emoji: '🏥', isDefault: true },
             { name: 'Other', emoji: '📦', isDefault: true },
             { name: 'Shopping', emoji: '🛍️', isDefault: true },
             { name: 'Travel', emoji: '🚗', isDefault: true }
         ];
+
+        // One-time migration for existing users: rename the old "Food" category
+        // to "Dining Out" (and add any missing defaults like Groceries). Covers
+        // categories list, all expenses, and all budget maps. Idempotent — safe
+        // to call on every load; no-ops once everything is already migrated.
+        function runCategoryMigrations() {
+            let changed = false;
+
+            // 1. Rename 'Food' → 'Dining Out' in categories list. Preserve any
+            //    custom emoji; only swap 🍔 → 🍽️ if still on the default.
+            if (Array.isArray(categories)) {
+                categories.forEach(function(c) {
+                    if (c && c.name === 'Food') {
+                        c.name = 'Dining Out';
+                        if (c.emoji === '🍔') c.emoji = '🍽️';
+                        changed = true;
+                    }
+                });
+                // Dedupe by name in case the user already had both.
+                const seen = new Set();
+                const deduped = [];
+                categories.forEach(function(c) {
+                    if (!c || !c.name || seen.has(c.name)) return;
+                    seen.add(c.name);
+                    deduped.push(c);
+                });
+                if (deduped.length !== categories.length) {
+                    categories = deduped;
+                    changed = true;
+                }
+            }
+
+            // 2. Rename on every expense.
+            if (expenses && typeof expenses === 'object') {
+                Object.keys(expenses).forEach(function(mk) {
+                    const arr = expenses[mk] || [];
+                    arr.forEach(function(e) {
+                        if (e && e.category === 'Food') {
+                            e.category = 'Dining Out';
+                            changed = true;
+                        }
+                    });
+                });
+            }
+
+            // 3. Rename on every budget map (keyed by category name).
+            if (budgets && typeof budgets === 'object') {
+                Object.keys(budgets).forEach(function(mk) {
+                    const mb = budgets[mk];
+                    if (mb && typeof mb === 'object' && Object.prototype.hasOwnProperty.call(mb, 'Food')) {
+                        if (!Object.prototype.hasOwnProperty.call(mb, 'Dining Out')) {
+                            mb['Dining Out'] = mb['Food'];
+                        }
+                        delete mb['Food'];
+                        changed = true;
+                    }
+                });
+            }
+
+            // 4. Inject any default categories the user is missing.
+            if (Array.isArray(categories)) {
+                const existingNames = new Set(categories.map(function(c) { return c && c.name; }));
+                defaultCategories.forEach(function(dc) {
+                    if (!existingNames.has(dc.name)) {
+                        categories.push(Object.assign({}, dc));
+                        changed = true;
+                    }
+                });
+            }
+
+            return changed;
+        }
 
         function sortCategories() {
             categories.sort((a, b) => a.name.localeCompare(b.name));
@@ -3041,8 +3113,12 @@
             if (numMatch) amount = parseFloat(numMatch[1]);
 
             const aliases = {
-                'food':'Food','eat':'Food','lunch':'Food','dinner':'Food','breakfast':'Food',
-                'snack':'Food','restaurant':'Food','cafe':'Food','coffee':'Food','tea':'Food',
+                'food':'Dining Out','eat':'Dining Out','lunch':'Dining Out','dinner':'Dining Out','breakfast':'Dining Out',
+                'snack':'Dining Out','restaurant':'Dining Out','cafe':'Dining Out','coffee':'Dining Out','tea':'Dining Out',
+                'swiggy':'Dining Out','zomato':'Dining Out','takeout':'Dining Out','delivery':'Dining Out',
+                'grocery':'Groceries','groceries':'Groceries','vegetables':'Groceries','veggies':'Groceries',
+                'fruits':'Groceries','milk':'Groceries','bread':'Groceries','rice':'Groceries','atta':'Groceries',
+                'sabzi':'Groceries','kirana':'Groceries','bigbasket':'Groceries','blinkit':'Groceries','zepto':'Groceries','supermarket':'Groceries',
                 'transport':'Travel','travel':'Travel','cab':'Travel','uber':'Travel',
                 'ola':'Travel','auto':'Travel','bus':'Travel','metro':'Travel',
                 'petrol':'Travel','fuel':'Travel','taxi':'Travel','ride':'Travel',
@@ -3490,9 +3566,9 @@
             const totalSpent = me.reduce((s, e) => s + e.amount, 0);
             const catLower = category.toLowerCase();
 
-            // Food category with multiple orders today
-            const todayFood = me.filter(function(e) { return e.category.toLowerCase() === 'food' && e.date === document.getElementById('date').value; });
-            if (catLower === 'food' && todayFood.length >= 2) {
+            // Dining Out category with multiple orders today
+            const todayFood = me.filter(function(e) { return e.category.toLowerCase() === 'dining out' && e.date === document.getElementById('date').value; });
+            if (catLower === 'dining out' && todayFood.length >= 2) {
                 return todayFood.length + ' orders today… Was it a need or a vibe?';
             }
 
@@ -3507,8 +3583,8 @@
                 return pickRemark(remarks.highSpend);
             }
 
-            // Food overspending
-            if (catLower === 'food') return pickRemark(remarks.food);
+            // Dining Out overspending
+            if (catLower === 'dining out') return pickRemark(remarks.food);
 
             // Shopping
             if (catLower === 'shopping') return pickRemark(remarks.shopping);
@@ -3546,7 +3622,7 @@
             const catSpend = {};
             me.forEach(function(e) { catSpend[e.category] = (catSpend[e.category] || 0) + e.amount; });
             const top = Object.entries(catSpend).sort(function(a, b) { return b[1] - a[1]; })[0];
-            if (top && top[0].toLowerCase() === 'food' && top[1] > total * 0.4) return pickRemark(remarks.food);
+            if (top && top[0].toLowerCase() === 'dining out' && top[1] > total * 0.4) return pickRemark(remarks.food);
             if (top && top[0].toLowerCase() === 'shopping' && top[1] > total * 0.3) return pickRemark(remarks.shopping);
 
             return pickRemark(remarks.monthly);
@@ -3843,8 +3919,16 @@
             if (sb) budgets = JSON.parse(sb);
             if (sc) categories = JSON.parse(sc);
             else { categories = [...defaultCategories]; }
+            // Apply any pending schema migrations (e.g. Food → Dining Out)
+            // before first render so the UI never flashes old category names.
+            const migratedLocal = runCategoryMigrations();
             sortCategories();
             if (su) { currentCurrency = su; document.getElementById('currencySelect').value = currentCurrency; }
+            if (migratedLocal) {
+                localStorage.setItem('expenses', JSON.stringify(expenses));
+                localStorage.setItem('budgets', JSON.stringify(budgets));
+                localStorage.setItem('categories', JSON.stringify(categories));
+            }
 
             // Merge server data with local (never overwrite). After merge, push
             // the unioned state back up so the server becomes canonical.
@@ -3869,9 +3953,12 @@
                         }
                         if (res.data.categories) {
                             categories = _mergeCategories(categories, res.data.categories);
-                            sortCategories();
                             changed = true;
                         }
+                        // Re-run migrations across merged state so server-side
+                        // entries still using 'Food' also get renamed.
+                        if (runCategoryMigrations()) changed = true;
+                        sortCategories();
                         if (res.data.currency && !su) {
                             currentCurrency = res.data.currency;
                             document.getElementById('currencySelect').value = currentCurrency;
