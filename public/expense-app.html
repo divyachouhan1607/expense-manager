@@ -3789,6 +3789,12 @@
             document.getElementById('scrollRight').classList.toggle('hidden', c.scrollLeft >= c.scrollWidth - c.clientWidth - 1);
         }
 
+        // Tracks whether the user has mutated data since loadData() started.
+        // If dirty, the server response must NOT blindly overwrite local state —
+        // that caused newly-added entries to disappear.
+        let _localDirty = false;
+        function markDirty() { _localDirty = true; }
+
         function loadData() {
             // Load from localStorage first (fast), then sync from server
             const se = localStorage.getItem('expenses');
@@ -3802,11 +3808,18 @@
             sortCategories();
             if (su) { currentCurrency = su; document.getElementById('currencySelect').value = currentCurrency; }
 
-            // Load from server (overrides localStorage if data exists)
+            // Load from server. Skip overwrite if user already mutated local state
+            // while the fetch was in flight — otherwise we'd wipe a just-added entry.
             fetch('/api/user-data')
                 .then(r => r.json())
                 .then(res => {
                     if (res.data) {
+                        if (_localDirty) {
+                            // User added/edited something during the fetch.
+                            // Keep local state and push it up so server catches up.
+                            saveData();
+                            return;
+                        }
                         if (res.data.expenses) expenses = res.data.expenses;
                         if (res.data.budgets) budgets = res.data.budgets;
                         if (res.data.categories) { categories = res.data.categories; sortCategories(); }
@@ -3827,7 +3840,10 @@
         }
 
         let _saveTimeout;
+        let _pendingSave = false;
         function saveData() {
+            _localDirty = true;
+            _pendingSave = true;
             localStorage.setItem('expenses', JSON.stringify(expenses));
             localStorage.setItem('budgets', JSON.stringify(budgets));
             localStorage.setItem('categories', JSON.stringify(categories));
@@ -3835,15 +3851,52 @@
             // Debounced save to server
             clearTimeout(_saveTimeout);
             _saveTimeout = setTimeout(() => {
+                _pendingSave = false;
                 fetch('/api/user-data', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         expenses, budgets, categories, currency: currentCurrency
                     })
-                }).catch(() => {}); // Offline fallback
+                })
+                .then(r => { if (!r.ok) throw new Error('save failed'); })
+                .catch(() => {
+                    // Surface failure so users know the entry isn't synced.
+                    // Next successful save will retry the full payload.
+                    _pendingSave = true;
+                    try { showToast('Could not sync to cloud. Will retry.', 'error', 3500); } catch (e) {}
+                });
             }, 500);
         }
+
+        // Flush pending save when the tab is hidden or being closed, so entries
+        // added right before close aren't lost inside the 500ms debounce window.
+        function flushSave() {
+            if (!_pendingSave) return;
+            clearTimeout(_saveTimeout);
+            _pendingSave = false;
+            const payload = JSON.stringify({ expenses, budgets, categories, currency: currentCurrency });
+            try {
+                if (navigator.sendBeacon) {
+                    const blob = new Blob([payload], { type: 'application/json' });
+                    navigator.sendBeacon('/api/user-data', blob);
+                    return;
+                }
+            } catch (e) {}
+            try {
+                fetch('/api/user-data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: payload,
+                    keepalive: true
+                }).catch(() => {});
+            } catch (e) {}
+        }
+        window.addEventListener('pagehide', flushSave);
+        window.addEventListener('beforeunload', flushSave);
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'hidden') flushSave();
+        });
 
         function setTodayDate() { document.getElementById('date').value = new Date().toISOString().split('T')[0]; }
 
